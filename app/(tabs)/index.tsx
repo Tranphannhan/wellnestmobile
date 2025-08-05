@@ -1,26 +1,27 @@
-import { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 
-export default function HomeScreen() {
-  const [data, setData] = useState<string>('');
+export default function IndexPage() {
   const router = useRouter();
 
-  function click() {
-    router.push('/explore'); // <-- Đường dẫn đến file Explore.tsx hoặc Explore/index.tsx
-  }
+  useEffect(() => {
+    const checkLogin = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        router.replace('/home'); // Nếu đã đăng nhập => vào home
+      } else {
+        router.replace('/login'); // Nếu chưa => vào login
+      }
+    };
+
+    checkLogin();
+  }, []);
 
   return (
-    <View style={{ backgroundColor: 'red', flex: 1, justifyContent: 'center', padding: 20 }}>
-      <Text>Hello cc</Text>
-      <Button onPress={click} color="blue" title="Nhấn tôi" />
-      <TextInput
-        style={{ backgroundColor: 'white', marginTop: 10, padding: 5 }}
-        onChange={(e) => {
-          setData(e.nativeEvent.text);
-          console.log(e.nativeEvent.text);
-        }}
-      />
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" />
     </View>
   );
 }
