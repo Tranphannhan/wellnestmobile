@@ -15,7 +15,8 @@ export default function HomePage() {
       <Text>Chào mừng đến với trang chủ</Text>
       <Button title="Đăng xuất" onPress={handleLogout} />
     </View>
-
     
+    
+
   );
 }
