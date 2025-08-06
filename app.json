@@ -11,6 +11,13 @@
     "ios": {
       "supportsTablet": true
     },
+
+    "expo": {
+      "android": {
+        "permissions": ["CAMERA"]
+      }
+    },
+
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -33,7 +40,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-barcode-scanner"
     ],
     "experiments": {
       "typedRoutes": true

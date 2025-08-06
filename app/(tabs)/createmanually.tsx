@@ -1,9 +1,9 @@
 import { View, Text } from 'react-native';
 
-export default function Home () {
+export default function CreateManually() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Trang Chủ</Text>
+      <Text>Tạo thủ công</Text>
     </View>
   );
 }

@@ -1,45 +1,64 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-
-import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
+        tabBarActiveTintColor: 'black',
+        tabBarLabelStyle: { fontSize: 12 },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Trang chủ',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol name="house.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="lookup"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Tra cứu',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol name="search.circle.fill" color={color} />
+          ),
         }}
       />
+
+      <Tabs.Screen
+        name="qrcode"
+        options={{
+          title: 'QR Code',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol name="qrcode" color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="createmanually"
+        options={{
+          title: 'Thủ công',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol name="hammer.fill" color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="acount"
+        options={{
+          title: 'Tài khoản',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol name="person.crop.circle" color={color} />
+          ),
+        }}
+      />
+
+
     </Tabs>
   );
 }
