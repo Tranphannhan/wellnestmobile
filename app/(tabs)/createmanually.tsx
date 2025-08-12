@@ -1,6 +1,6 @@
 // app/(tabs)/createmanually.tsx
 import React, { useState } from 'react';
-import { ScrollView, Text, TextInput, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import { Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function CreateManuallyScreen() {
   const [form, setForm] = useState({
@@ -20,10 +20,10 @@ export default function CreateManuallyScreen() {
   };
 
   const handleSubmit = () => {
-    // TODO: validate + call API
     console.log('Form:', form);
   };
 
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.label}>*Họ và tên:</Text>
@@ -120,9 +120,15 @@ export default function CreateManuallyScreen() {
         onChangeText={(val) => handleChange('lichSuBenh', val)}
       />
 
-      <View style={{ marginTop: 24 }}>
-        <Button title="Tạo số khám bệnh tạm thời" onPress={handleSubmit} color="#007AFF" />
+      <View style={{ marginTop: 24 , marginBottom : 30 }}>
+        <Button 
+          title="Tạo số khám bệnh tạm thời" 
+          onPress={handleSubmit} 
+          color="#007A86" 
+          />
       </View>
+
+
     </ScrollView>
   );
 }
@@ -130,7 +136,7 @@ export default function CreateManuallyScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: '#F0F8FF',
+    backgroundColor: '#fcfcfcff',
   },
   label: {
     marginTop: 12,
@@ -160,16 +166,20 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 6,
   },
+
   genderOption: {
     flex: 1,
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 6,
     backgroundColor: '#e0e0e0',
     alignItems: 'center',
   },
+
   genderSelected: {
-    backgroundColor: '#4C9AFF',
+    backgroundColor: '#007A86',
+    borderRadius: 6,
   },
+
   genderText: {
     fontWeight: '600',
     color: '#fff',

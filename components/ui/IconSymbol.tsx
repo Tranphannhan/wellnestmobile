@@ -8,12 +8,13 @@ import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
  * Dựa trên https://icons.expo.fyi để chọn icon đúng.
  */
 const MAPPING = {
-  'house.fill': 'home',              // Trang chủ
-  'search.circle.fill': 'search',    // Tra cứu
-  'qrcode': 'qr-code-2',             // Mã QR
+  'house.fill': 'home',               // Trang chủ
+  'search.circle.fill': 'search', // Tra cứu nổi bật
+  'qrcode': 'qr-code-2',              // Mã QR
   'hammer.fill': 'build',            // Thủ công
-  'person.crop.circle': 'person',   // Tài khoản
+  'person.crop.circle': 'person',    // Tài khoản
 } as const;
+
 
 type IconSymbolName = keyof typeof MAPPING;
 type MaterialIconName = ComponentProps<typeof MaterialIcons>['name'];

@@ -1,22 +1,16 @@
+
 {
   "expo": {
     "name": "wellnestapp",
     "slug": "wellnestapp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/adaptive-icon.png",
     "scheme": "wellnestapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
-    },
-    "expo": {
-      "android": {
-        "permissions": [
-          "CAMERA"
-        ]
-      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,10 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.CAMERA"
-      ],
+      "permissions": ["CAMERA"],
       "package": "com.anonymous.wellnestapp"
     },
     "web": {

@@ -1,12 +1,13 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
   FlatList,
   Image,
+  StyleSheet,
+  Text,
+  TextInput,
   TouchableOpacity,
+  View,
 } from 'react-native';
 
 const mockData = [
@@ -15,26 +16,27 @@ const mockData = [
     hoTen: 'Phạm Minh Khoa',
     ngaySinh: '2005-10-22',
     gioiTinh: 'Nam',
-    avatar: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png', // icon mặc định
+    avatar: 'https://anhnail.com/wp-content/uploads/2024/09/Hinh-gai-xinh-mac-vay-trang-ngan-che-mat.jpg',
   },
   {
     id: '2',
-    hoTen: 'Nguyễn Thị Hồng Nhung',
+    hoTen: 'Nguyễn Thị Nhung',
     ngaySinh: '1992-03-10',
     gioiTinh: 'Nữ',
-    avatar: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+    avatar: 'https://wellavn.com/wp-content/uploads/2024/11/anh-gai-xinh-che-mat-bang-dien-thoai.jpeg',
   },
   {
     id: '3',
     hoTen: 'Nike Air R2',
     ngaySinh: '1111-11-11',
     gioiTinh: 'Nam',
-    avatar: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+    avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShGldpCglRLHDXxqnNZUcYHNm33aJ6J4KqGGgzwv1daoGQYdTsrxfZzA_iBHEm8KyHoKU&usqp=CAU',
   },
 ];
 
 export default function Lookup() {
   const [searchText, setSearchText] = useState('');
+  const router = useRouter();
 
   const filteredData = mockData.filter((item) =>
     item.hoTen.toLowerCase().includes(searchText.toLowerCase())
@@ -42,38 +44,52 @@ export default function Lookup() {
 
   const renderItem = ({ item }: any) => (
     <View style={styles.card}>
+      {/* Avatar */}
       <Image source={{ uri: item.avatar }} style={styles.avatar} />
-      <View style={styles.infoContainer}>
+
+      {/* Thông tin */}
+      <View style={styles.info}>
         <Text style={styles.name}>{item.hoTen}</Text>
-        <Text style={styles.subInfo}>🎂 Ngày sinh: {item.ngaySinh}</Text>
-        <Text style={styles.subInfo}>👤 Giới tính: {item.gioiTinh}</Text>
+        <Text style={styles.role}>Bệnh nhân</Text>
       </View>
-      <TouchableOpacity style={styles.button} onPress={() => alert(`Chi tiết ${item.hoTen}`)}>
-        <Text style={styles.buttonText}>Xem</Text>
+
+      {/* Nút xem chi tiết */}
+      <TouchableOpacity
+        style={styles.detailButton}
+        onPress={() =>
+          router.push({ pathname: '/Patient details', params: { id: item.id } })
+        }
+      >
+        <Text style={styles.detailButtonText}>Xem chi tiết</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>🔍 Tra cứu thông tin bệnh nhân</Text>
+      {/* Thanh tìm kiếm */}
       <TextInput
         style={styles.input}
         placeholder="Nhập tên bệnh nhân..."
         value={searchText}
         onChangeText={setSearchText}
       />
+      {/* Danh sách */}
       <FlatList
         data={filteredData}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListEmptyComponent={
-          <Text style={{ textAlign: 'center', marginTop: 20 }}>Không tìm thấy kết quả.</Text>
+          <Text style={{ textAlign: 'center', marginTop: 20 }}>
+            Không tìm thấy kết quả.
+          </Text>
         }
       />
     </View>
   );
 }
+
+const PRIMARY_COLOR = '#007A86';
 
 const styles = StyleSheet.create({
   container: {
@@ -85,7 +101,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 12,
-    color: '#007AFF',
+    color: PRIMARY_COLOR,
   },
   input: {
     padding: 10,
@@ -97,41 +113,38 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 14,
-    marginBottom: 12,
     alignItems: 'center',
-    elevation: 2,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    marginRight: 10,
   },
-  infoContainer: {
+  info: {
     flex: 1,
   },
   name: {
     fontWeight: '600',
-    fontSize: 16,
-    color: '#333',
+    fontSize: 15,
+    color: '#000',
   },
-  subInfo: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+  role: {
+    fontSize: 13,
+    color: '#777',
   },
-  button: {
-    backgroundColor: '#007AFF',
+  detailButton: {
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 20,
+    paddingHorizontal: 14,
     paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 10,
   },
-  buttonText: {
+  detailButtonText: {
+    fontSize: 12,
     color: '#fff',
     fontWeight: '500',
-    fontSize: 13,
   },
 });

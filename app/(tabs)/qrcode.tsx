@@ -1,11 +1,10 @@
-// import React, { useEffect, useState } from 'react';
+// import React, { useState, useEffect } from 'react';
+// import { Text, View, Button } from 'react-native';
 // import { BarCodeScanner } from 'expo-barcode-scanner';
-// import { Alert, Button, StyleSheet, Text, View } from 'react-native';
 
-// export default function QrcodeScreen() {
+// export default function App() {
 //   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 //   const [scanned, setScanned] = useState(false);
-//   const [qrData, setQrData] = useState<string | null>(null);
 
 //   useEffect(() => {
 //     (async () => {
@@ -14,82 +13,30 @@
 //     })();
 //   }, []);
 
-//   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
-//     setScanned(true);
-//     setQrData(data);
-//     Alert.alert('✅ Mã QR đã quét', `📦 Dữ liệu: ${data}`);
-//   };
-
 //   if (hasPermission === null) {
-//     return (
-//       <View style={styles.centered}>
-//         <Text>📸 Đang xin quyền truy cập camera...</Text>
-//       </View>
-//     );
+//     return <Text>Đang xin quyền truy cập camera...</Text>;
 //   }
-
 //   if (hasPermission === false) {
-//     return (
-//       <View style={styles.centered}>
-//         <Text>❌ Không có quyền truy cập camera</Text>
-//       </View>
-//     );
+//     return <Text>Không có quyền dùng camera</Text>;
 //   }
 
 //   return (
-//     <View style={styles.container}>
+//     <View style={{ flex: 1 }}>
 //       <BarCodeScanner
-//         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-//         barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
-//         style={StyleSheet.absoluteFillObject}
+//         onBarCodeScanned={
+//           scanned ? undefined : ({ type, data }) => {
+//             setScanned(true);
+//             alert(`Mã QR: ${data}`);
+//           }
+//         }
+//         style={{ flex: 1 }}
 //       />
-
-//       {scanned && (
-//         <View style={styles.buttonContainer}>
-//           <Button title="🔄 Quét lại" onPress={() => { setScanned(false); setQrData(null); }} color="#1E90FF" />
-//         </View>
-//       )}
-
-//       {qrData && (
-//         <View style={styles.qrResult}>
-//           <Text style={styles.resultText}>📦 Dữ liệu: {qrData}</Text>
-//         </View>
-//       )}
+//       {scanned && <Button title="Quét lại" onPress={() => setScanned(false)} />}
 //     </View>
 //   );
 // }
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//   },
-//   centered: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   buttonContainer: {
-//     position: 'absolute',
-//     bottom: 40,
-//     left: 20,
-//     right: 20,
-//   },
-//   qrResult: {
-//     position: 'absolute',
-//     top: 60,
-//     left: 20,
-//     right: 20,
-//     padding: 10,
-//     backgroundColor: 'white',
-//     borderRadius: 10,
-//     elevation: 5,
-//   },
-//   resultText: {
-//     fontSize: 16,
-//     fontWeight: '500',
-//     color: '#333',
-//   },
-// });
+
 
 
 import { Text, View } from 'react-native';
