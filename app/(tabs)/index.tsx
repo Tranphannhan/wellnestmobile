@@ -1,27 +1,16 @@
-import React, { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { Text, View } from 'react-native';
 
-export default function IndexPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const checkLogin = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        router.replace('/home'); // Nếu đã đăng nhập => vào home
-      } else {
-        router.replace('/login'); // Nếu chưa => vào login
-      }
-    };
-
-    checkLogin();
-  }, []);
-
+export default function Home () {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" />
+      <Text>Trang Chủ c</Text>
+      
+
+
     </View>
+
+
+
+    
   );
 }
