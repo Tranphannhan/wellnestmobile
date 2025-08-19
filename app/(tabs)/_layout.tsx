@@ -61,6 +61,7 @@ export default function TabLayout() {
         }}
       />
 
+      {/* Thông tin tài khoản */}
       <Tabs.Screen
         name="acount"
         options={{
@@ -70,11 +71,54 @@ export default function TabLayout() {
         }}
       />
 
+      
+      {/* Thông tin bệnh nhân */}
       <Tabs.Screen
         name="Patient details"
         options={{
           href: null,
           title: 'Thông tin bệnh nhân',
+           tabBarStyle: { display: 'none' },
+          headerLeft: () => (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.replace('/lookup')} // Luôn điều hướng về tab Tra cứu
+            >
+              <Ionicons name="arrow-back" size={22} color="#494949" />
+              <Text style={styles.backText}></Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+
+      
+      {/* Thanh toán */}
+      <Tabs.Screen
+        name="pay"
+        options={{
+          href: null,
+          title: 'Thanh toán',
+          tabBarStyle: { display: 'none' }, // 👈 Ẩn tab bar ở màn hình này
+          headerLeft: () => (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.replace('/lookup')}
+            >
+              <Ionicons name="arrow-back" size={22} color="#494949" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+
+      {/* Xác nhận thanh toán */}
+      <Tabs.Screen
+        name="paymentConfirmation"
+        options={{
+          href: null,
+          title: 'Xác nhận thanh toán',
+          tabBarStyle: { display: 'none' },
           headerLeft: () => (
             <TouchableOpacity
               style={styles.backButton}
@@ -93,6 +137,7 @@ export default function TabLayout() {
         options={{
           href: null,
           title: 'Nhập thông tin phòng',
+           tabBarStyle: { display: 'none' },
           headerLeft: () => (
             <TouchableOpacity
               style={styles.backButton}
@@ -105,12 +150,13 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Chọn phòng - */}
+      {/* Chọn phòng khám  */}
        <Tabs.Screen
         name="confirmRoomSelection"
         options={{
           href: null,
           title: 'Chọn phòng khám',
+          tabBarStyle: { display: 'none' },
           headerLeft: () => (
             <TouchableOpacity
               style={styles.backButton}

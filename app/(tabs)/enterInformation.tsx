@@ -89,10 +89,13 @@ export default function EnterInformation() {
           placeholderTextColor="#8d8d8dff"
       />
 
+
       {/* Button */}
       <TouchableOpacity 
         style={styles.button}
-        onPress={() => router.push("/confirmRoomSelection")}
+        // onPress={() => router.push("/confirmRoomSelection")}
+        // onPress={() => router.push("/paymentConfirmation")}
+        onPress={() => router.push("/pay")}
       >
         
         <Text style={styles.buttonText}>Tiếp tục</Text>
@@ -150,3 +153,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
+
+
+
+// onPress={() => router.push("/confirmRoomSelection")}
+        // onPress={() => router.push("/paymentConfirmation")}
+        // onPress={() => router.push("/pay")}
