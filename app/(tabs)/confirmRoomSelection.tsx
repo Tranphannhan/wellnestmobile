@@ -16,8 +16,20 @@ interface Room {
 }
 
 const rooms: Room[] = [
-  { doctor: "Nguyễn Đình Huân", roomNumber: 108, patients: 0, maxPatients: 14, estimateMinutes: 0 },
-  { doctor: "Trần Văn B", roomNumber: 201, patients: 5, maxPatients: 10, estimateMinutes: 15 },
+  {
+    doctor: "Nguyễn Đình Huân",
+    roomNumber: 108,
+    patients: 0,
+    maxPatients: 14,
+    estimateMinutes: 0,
+  },
+  {
+    doctor: "Trần Văn B",
+    roomNumber: 201,
+    patients: 5,
+    maxPatients: 10,
+    estimateMinutes: 15,
+  },
 ];
 
 export default function ChooseRoomMobile() {
@@ -48,44 +60,64 @@ export default function ChooseRoomMobile() {
           <Text style={styles.roomNumber}>Phòng {item.roomNumber}</Text>
         </View>
         <Text style={styles.font}>
-          Đang khám: <Text style={styles.bold}>{item.patients}/{item.maxPatients}</Text> bệnh nhân
+          Đang khám:{" "}
+          <Text style={styles.bold}>
+            {item.patients}/{item.maxPatients}
+          </Text>{" "}
+          bệnh nhân
         </Text>
         <Text style={styles.font}>
-          Thời gian dự tính: <Text style={styles.bold}>{formatTime(item.estimateMinutes)}</Text>
+          Thời gian dự tính:{" "}
+          <Text style={styles.bold}>{formatTime(item.estimateMinutes)}</Text>
         </Text>
-        <View style={[styles.status, getBadgeStyle(item.patients, item.maxPatients)]}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: 8,
+            justifyContent: "space-between",
+          }}
+        >
           <View
             style={[
-              styles.statusDot,
-              item.patients / item.maxPatients < 0.3
-                ? { backgroundColor: "#00ce00" }
-                : item.patients / item.maxPatients < 0.7
-                ? { backgroundColor: "#ff9900" }
-                : { backgroundColor: "#ff3333" },
+              styles.status,
+              getBadgeStyle(item.patients, item.maxPatients),
             ]}
-          />
-          <Text style={styles.statusText}>
-            {item.patients / item.maxPatients < 0.3
-              ? "Ít bệnh nhân"
-              : item.patients / item.maxPatients < 0.7
-              ? "Trung bình"
-              : "Quá tải"}
-          </Text>
+          >
+            <View
+              style={[
+                styles.statusDot,
+                item.patients / item.maxPatients < 0.3
+                  ? { backgroundColor: "#00ce00" }
+                  : item.patients / item.maxPatients < 0.7
+                  ? { backgroundColor: "#ff9900" }
+                  : { backgroundColor: "#ff3333" },
+              ]}
+            />
+            <Text style={styles.statusText}>
+              {item.patients / item.maxPatients < 0.3
+                ? "Ít bệnh nhân"
+                : item.patients / item.maxPatients < 0.7
+                ? "Trung bình"
+                : "Quá tải"}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.button,
+              isSelected && styles.buttonSelected,
+              isFull && styles.buttonDisabled,
+            ]}
+            disabled={isFull}
+            onPress={() => setSelectedRoom(item.roomNumber)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.buttonText}>
+              {isFull ? "Đã đầy" : isSelected ? "Ưu tiên" : "Chọn phòng"}
+            </Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[
-            styles.button,
-            isSelected && styles.buttonSelected,
-            isFull && styles.buttonDisabled,
-          ]}
-          disabled={isFull}
-          onPress={() => setSelectedRoom(item.roomNumber)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.buttonText}>
-            {isFull ? "Đã đầy" : isSelected ? "Ưu tiên" : "Chọn phòng"}
-          </Text>
-        </TouchableOpacity>
       </View>
     );
   };
@@ -113,9 +145,18 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
-  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
   statusDot: { width: 8, height: 8, borderRadius: 5, marginRight: 8 },
-  doctor: { fontSize: 18, fontWeight: "600", color: "#1d1d1dff" },
+  doctor: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1d1d1dff",
+    maxWidth: "80%",
+  },
   roomNumber: { fontSize: 16, fontWeight: "500", color: "#009f9fff" },
   font: { fontSize: 16, color: "#444", marginVertical: 2 },
   bold: { fontWeight: "600", color: "#222" },
@@ -134,7 +175,9 @@ const styles = StyleSheet.create({
   statusRed: { backgroundColor: "#ffc0c6ff" },
   button: {
     marginTop: 12,
+    marginLeft: "auto",
     paddingVertical: 10,
+    paddingHorizontal: 15,
     borderRadius: 8,
     backgroundColor: "#009f9fff",
     alignItems: "center",
@@ -142,8 +185,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+    alignSelf: "flex-start",
   },
-  buttonSelected: { backgroundColor: "#62ff82ff" },
+  buttonSelected: { backgroundColor: "#00cb29ff" },
   buttonDisabled: { backgroundColor: "#888" },
-  buttonText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+  buttonText: { color: "#fff", fontWeight: "700", fontSize: 14 },
 });
