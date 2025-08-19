@@ -58,11 +58,11 @@ export default function ChooseRoomMobile() {
         return (
           <View key={index} style={styles.card}>
             <View style={styles.header}>
-              <Text style={styles.doctor}>{room.doctor}</Text>
+              <Text style={styles.doctor}>BS. {room.doctor}</Text>
               <Text style={styles.roomNumber}>Phòng {room.roomNumber}</Text>
             </View>
             <Text style={styles.font}>
-              Số lượng:{" "}
+              Đang khám:{" "}
               <Text style={styles.bold}>
                 {room.patients}/{room.maxPatients}
               </Text>{" "}
@@ -144,8 +144,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginRight: 8,
   },
-  doctor: { fontSize: 18, fontWeight: "600", color: "#333" },
-  roomNumber: { fontSize: 16, fontWeight: "500", color: "#666" },
+  doctor: { fontSize: 18, fontWeight: "600", color: "#1d1d1dff" },
+  roomNumber: { fontSize: 16, fontWeight: "500", color: "#009f9fff" },
   font: { fontSize: 16, color: "#444", marginVertical: 2 },
   bold: { fontWeight: "600", color: "#222" },
   status: {
@@ -159,12 +159,12 @@ const styles = StyleSheet.create({
     alignItems:'center'
   },
   statusText: { fontWeight: "600", color: "#000000ff", fontSize: 14 },
-  statusGreen: { backgroundColor: "#9cffb3ff" },
-  statusOrange: { backgroundColor: "#ffe38dff" },
-  statusRed: { backgroundColor: "#ff929dff" },
+  statusGreen: { backgroundColor: "#caffd6ff" },
+  statusOrange: { backgroundColor: "#fff2caff" },
+  statusRed: { backgroundColor: "#ffc0c6ff" },
   button: {
     marginTop: 12,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 8,
     backgroundColor: "#009f9fff",
     alignItems: "center",
