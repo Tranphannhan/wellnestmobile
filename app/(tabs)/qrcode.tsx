@@ -1,57 +1,76 @@
-// import { BarCodeScanner } from 'expo-barcode-scanner';
-import React from 'react';
-import { Text, View } from 'react-native';
+import React, { useState } from "react";
+import { Text, View, Button, StyleSheet } from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera";
 
+export default function QrScanner() {
+  const [permission, requestPermission] = useCameraPermissions();
+  const [scanned, setScanned] = useState(false);
+  const [qrData, setQrData] = useState("");
 
+  if (!permission) {
+    // Đang load quyền
+    return <View />;
+  }
 
+  if (!permission.granted) {
+    // Nếu chưa có quyền thì hiện nút xin quyền
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: "center" }}>Ứng dụng cần quyền truy cập camera</Text>
+        <Button onPress={requestPermission} title="Cấp quyền" />
+      </View>
+    );
+  }
 
+  const handleBarCodeScanned = (event: { data: string; type: string }) => {
+    setScanned(true);
+    setQrData(event.data);
+    alert(`Đã quét thành công: ${event.data}`);
+  };
 
-
-// export default function Qrcode() {
-//   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-//   const [scanned, setScanned] = useState(false);
-
-//   useEffect(() => {
-//     (async () => {
-//       const { status } = await BarCodeScanner.requestPermissionsAsync();
-//       setHasPermission(status === 'granted');
-//     })();
-//   }, []);
-
-//   if (hasPermission === null) {
-//     return <Text>Đang xin quyền truy cập camera...</Text>;
-//   }
-//   if (hasPermission === false) {
-//     return <Text>Không có quyền dùng camera</Text>;
-//   }
-
-//   return (
-//     <View style={{ flex: 1 }}>
-//       <BarCodeScanner
-//         onBarCodeScanned={
-//           scanned ? undefined : ({ type, data }) => {
-//             setScanned(true);
-//             alert(`Mã QR: ${data}`);
-//           }
-//         }
-//         style={{ flex: 1 }}
-//       />
-//       {scanned && <Button title="Quét lại" onPress={() => setScanned(false)} />}
-//     </View>
-//   );
-// }
-
-export default function Qrcode () {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text
-        style = {{
-          color : 'red'
+    <View style={styles.container}>
+      <CameraView
+        style={StyleSheet.absoluteFillObject}
+        facing="back"
+        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+        barcodeScannerSettings={{
+          barcodeTypes: ["qr"], // chỉ quét QR
         }}
+      />
 
-        
-      >Quet mã qr hello </Text>
+      <View style={styles.overlay}>
+        {scanned ? (
+          <Button title="Quét lại" onPress={() => setScanned(false)} />
+        ) : (
+          <Text style={styles.text}>Đưa mã QR vào khung</Text>
+        )}
+        {qrData ? <Text style={styles.result}>Kết quả: {qrData}</Text> : null}
+      </View>
     </View>
   );
-
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "flex-end",
+  },
+  overlay: {
+    position: "absolute",
+    bottom: 60,
+    width: "100%",
+    alignItems: "center",
+  },
+  text: {
+    color: "white",
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  result: {
+    color: "yellow",
+    fontSize: 16,
+    marginTop: 10,
+  },
+});

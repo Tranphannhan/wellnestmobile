@@ -1,8 +1,10 @@
+import { searchMedicalExaminationBook } from '@/services/lookup';
+import { medicalExaminationBook } from '@/types/lookup.type';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
-  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -10,56 +12,66 @@ import {
   View,
 } from 'react-native';
 
-const mockData = [
-  {
-    id: '1',
-    hoTen: 'Phạm Minh Khoa',
-    ngaySinh: '2005-10-22',
-    gioiTinh: 'Nam',
-    avatar: 'https://anhnail.com/wp-content/uploads/2024/09/Hinh-gai-xinh-mac-vay-trang-ngan-che-mat.jpg',
-  },
-  {
-    id: '2',
-    hoTen: 'Nguyễn Thị Nhung',
-    ngaySinh: '1992-03-10',
-    gioiTinh: 'Nữ',
-    avatar: 'https://wellavn.com/wp-content/uploads/2024/11/anh-gai-xinh-che-mat-bang-dien-thoai.jpeg',
-  },
-  {
-    id: '3',
-    hoTen: 'Nike Air R2',
-    ngaySinh: '1111-11-11',
-    gioiTinh: 'Nam',
-    avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShGldpCglRLHDXxqnNZUcYHNm33aJ6J4KqGGgzwv1daoGQYdTsrxfZzA_iBHEm8KyHoKU&usqp=CAU',
-  },
-];
+const PRIMARY_COLOR = '#007A86';
 
 export default function Lookup() {
   const [searchText, setSearchText] = useState('');
   const router = useRouter();
 
-  const filteredData = mockData.filter((item) =>
-    item.hoTen.toLowerCase().includes(searchText.toLowerCase())
+  const [valueRender, setValueRender] = useState<medicalExaminationBook[]>([]);
+  const [searchPhone, setSearchPhone] = useState<string>('');
+  const [searchName, setSearchName] = useState<string>('');
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadAPI = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await searchMedicalExaminationBook(searchPhone,searchName,totalPages);
+        if (response?.data.length === 0) return setValueRender ([]);
+        setValueRender (response.data)
+      } 
+      
+      catch (err: any) {
+        console.error('API error:', err);
+        setError('Không thể tải dữ liệu');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAPI();
+  }, [searchPhone, searchName, totalPages]);
+
+  
+  const filteredData = valueRender.filter((item) =>
+    item.HoVaTen?.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const renderItem = ({ item }: any) => (
+  const renderItem = ({ item }: { item: medicalExaminationBook }) => (
     <View style={styles.card}>
-      {/* Avatar */}
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
-
       {/* Thông tin */}
       <View style={styles.info}>
-        <Text style={styles.name}>{item.hoTen}</Text>
-        <Text style={styles.role}>Bệnh nhân</Text>
+        <Text style={styles.name}>{item.HoVaTen}</Text>
+        <Text style={styles.role}>
+          {item.GioiTinh} • {item.NgaySinh}
+        </Text>
       </View>
 
       {/* Nút xem chi tiết */}
       <TouchableOpacity
-        style={styles.detailButton}
-        onPress={() =>
-          router.push({ pathname: '/Patient details', params: { id: item.id } })
-        }
-      >
+            style={styles.detailButton}
+            onPress={() =>
+              router.push({
+                pathname: '/Patient details',
+                params: { id: item._id },
+              })
+            }
+          >
         <Text style={styles.detailButtonText}>Xem chi tiết</Text>
       </TouchableOpacity>
     </View>
@@ -67,41 +79,43 @@ export default function Lookup() {
 
   return (
     <View style={styles.container}>
-      {/* Thanh tìm kiếm */}
       <TextInput
         style={styles.input}
         placeholder="Nhập tên bệnh nhân..."
         value={searchText}
         onChangeText={setSearchText}
+        keyboardType="default" 
       />
-      {/* Danh sách */}
-      <FlatList
-        data={filteredData}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={{ textAlign: 'center', marginTop: 20 }}>
-            Không tìm thấy kết quả.
-          </Text>
-        }
-      />
+
+      {loading && <ActivityIndicator size="large" color={PRIMARY_COLOR} />}
+
+      {error && (
+        <Text style={{ color: 'red', textAlign: 'center', marginTop: 20 }}>
+          {error}
+        </Text>
+      )}
+
+      {!loading && !error && (
+        <FlatList
+          data={filteredData}
+          keyExtractor={(item) => String(item._id)}
+          renderItem={renderItem}
+          ListEmptyComponent={
+            <Text style={{ textAlign: 'center', marginTop: 20 }}>
+              Không tìm thấy kết quả.
+            </Text>
+          }
+        />
+      )}
     </View>
   );
 }
-
-const PRIMARY_COLOR = '#007A86';
 
 const styles = StyleSheet.create({
   container: {
     padding: 16,
     backgroundColor: '#F8FAFF',
     flex: 1,
-  },
-  header: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 12,
-    color: PRIMARY_COLOR,
   },
   input: {
     padding: 10,
@@ -117,12 +131,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-  },
-  avatar: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    marginRight: 10,
   },
   info: {
     flex: 1,

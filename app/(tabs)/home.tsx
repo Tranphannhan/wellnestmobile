@@ -29,7 +29,7 @@ export default function Home() {
             />
             
             <View>
-              <Text style={{ color: '#fff', fontSize: 14 }}>Chào bạn</Text>
+              <Text style={{ color: '#fff', fontSize: 14 }}>Tiếp nhận</Text>
               <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold' }}>Nguyen Dinh Huan</Text>
             </View>
           </View>
