@@ -1,8 +1,13 @@
-// import React, { useState, useEffect } from 'react';
-// import { Text, View, Button } from 'react-native';
 // import { BarCodeScanner } from 'expo-barcode-scanner';
+import React from 'react';
+import { Text, View } from 'react-native';
 
-// export default function App() {
+
+
+
+
+
+// export default function Qrcode() {
 //   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 //   const [scanned, setScanned] = useState(false);
 
@@ -36,11 +41,6 @@
 //   );
 // }
 
-
-
-
-import { Text, View } from 'react-native';
-
 export default function Qrcode () {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -50,7 +50,7 @@ export default function Qrcode () {
         }}
 
         
-      >Quet mã qr </Text>
+      >Quet mã qr hello </Text>
     </View>
   );
 
