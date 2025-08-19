@@ -70,7 +70,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Màn hình chi tiết bệnh nhân */}
       <Tabs.Screen
         name="Patient details"
         options={{
@@ -80,6 +79,42 @@ export default function TabLayout() {
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => router.replace('/lookup')} // Luôn điều hướng về tab Tra cứu
+            >
+              <Ionicons name="arrow-back" size={22} color="#494949" />
+              <Text style={styles.backText}></Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+      {/* Nhập thông tin phòng */}
+      <Tabs.Screen
+        name="enterInformation"
+        options={{
+          href: null,
+          title: 'Nhập thông tin phòng',
+          headerLeft: () => (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.replace('/lookup')} // Luôn điều hướng về tab Tra cứu
+            >
+              <Ionicons name="arrow-back" size={22} color="#494949" />
+              <Text style={styles.backText}></Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+      {/* Chọn phòng - */}
+       <Tabs.Screen
+        name="confirmRoomSelection"
+        options={{
+          href: null,
+          title: 'Chọn phòng khám',
+          headerLeft: () => (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.replace('/enterInformation')} // Luôn điều hướng về tab Tra cứu
             >
               <Ionicons name="arrow-back" size={22} color="#494949" />
               <Text style={styles.backText}></Text>
