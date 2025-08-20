@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 import {
   Image,
   ScrollView,
@@ -7,27 +7,31 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { router } from 'expo-router'; // 👈 Thêm import này
+} from "react-native";
+import { router } from "expo-router";
 
 export default function Account() {
+  // 👉 Giả lập dữ liệu user theo đúng field
   const user = {
-    hoTen: 'Nguyễn Đình Huân',
-    vaiTro: 'Admin',
-    soDienThoai: '0369594026',
-    soCCCD: '092018304122',
-    gioiTinh: 'Nam',
-    avatar:
-      'https://anhnail.com/wp-content/uploads/2024/09/Hinh-gai-xinh-mac-vay-trang-ngan-che-mat.jpg', // demo
+    _id: "12345",
+    _TenTaiKhoan: "Nguyễn Đình Huân",
+    _SoDienThoai: "0369594026",
+    _SoCCCD: "092018304122",
+    _Image:
+      "https://anhnail.com/wp-content/uploads/2024/09/Hinh-gai-xinh-mac-vay-trang-ngan-che-mat.jpg",
+    _NamSinh: "2000",
+    _GioiTinh: "Nam",
+    _Id_LoaiTaiKhoan: {
+      VaiTro: "Admin",
+    },
   };
 
-  // ✅ Chuyển sang trang edit-account
   const handleEditInfo = () => {
-    router.push('/edit account'); 
+    alert('ok')
   };
 
   const handleLogout = () => {
-    console.log('Đăng xuất');
+    console.log("Đăng xuất");
   };
 
   return (
@@ -40,16 +44,21 @@ export default function Account() {
           </TouchableOpacity>
         </View>
 
-        <Image source={{ uri: user.avatar }} style={styles.avatar} />
-        <Text style={styles.name}>{user.hoTen}</Text>
-        <Text style={styles.role}>{user.vaiTro}</Text>
+        <Image source={{ uri: user._Image }} style={styles.avatar} />
+        <Text style={styles.name}>{user._TenTaiKhoan}</Text>
+        <Text style={styles.role}>{user._Id_LoaiTaiKhoan.VaiTro}</Text>
       </View>
 
       {/* Thông tin cá nhân */}
       <View style={styles.infoBox}>
-        <InfoRow icon="call-outline" label="Số điện thoại" value={user.soDienThoai} />
-        <InfoRow icon="card-outline" label="CCCD" value={user.soCCCD} />
-        <InfoRow icon="male-outline" label="Giới tính" value={user.gioiTinh} />
+        <InfoRow
+          icon="call-outline"
+          label="Số điện thoại"
+          value={user._SoDienThoai}
+        />
+        <InfoRow icon="card-outline" label="CCCD" value={user._SoCCCD} />
+        <InfoRow icon="calendar-outline" label="Năm sinh" value={user._NamSinh} />
+        <InfoRow icon="male-outline" label="Giới tính" value={user._GioiTinh} />
       </View>
 
       {/* Nút chức năng */}
@@ -63,7 +72,15 @@ export default function Account() {
   );
 }
 
-const InfoRow = ({ icon, label, value }: { icon: any; label: string; value: string }) => (
+const InfoRow = ({
+  icon,
+  label,
+  value,
+}: {
+  icon: any;
+  label: string;
+  value: string;
+}) => (
   <View style={styles.infoRow}>
     <Ionicons name={icon} size={20} color="#007A86" style={{ marginRight: 10 }} />
     <View style={{ flex: 1 }}>
@@ -76,23 +93,23 @@ const InfoRow = ({ icon, label, value }: { icon: any; label: string; value: stri
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F4F6FA',
+    backgroundColor: "#F4F6FA",
   },
   header: {
-    backgroundColor: '#007A86',
+    backgroundColor: "#007A86",
     paddingVertical: 20,
-    alignItems: 'center',
+    alignItems: "center",
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-    position: 'relative',
+    position: "relative",
   },
   headerTop: {
-    position: 'absolute',
+    position: "absolute",
     top: 20,
     right: 20,
   },
   editIcon: {
-    backgroundColor: '#007A86',
+    backgroundColor: "#007A86",
     padding: 8,
     borderRadius: 50,
   },
@@ -101,42 +118,42 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 50,
     borderWidth: 3,
-    borderColor: '#fff',
+    borderColor: "#fff",
     marginBottom: 10,
   },
   name: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
   },
   role: {
     fontSize: 14,
-    color: '#e0e0e0',
+    color: "#e0e0e0",
   },
   infoBox: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginHorizontal: 16,
     marginTop: 20,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   label: {
-    fontWeight: '600',
-    color: '#444',
+    fontWeight: "600",
+    color: "#444",
   },
   value: {
-    color: '#333',
+    color: "#333",
     fontSize: 14,
   },
   actionBox: {
@@ -145,16 +162,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   logoutButton: {
-    backgroundColor: '#4d4d4dff',
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: "#4d4d4dff",
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 12,
-    justifyContent: 'center',
+    justifyContent: "center",
     borderRadius: 10,
     gap: 8,
   },
   logoutButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
   },
 });

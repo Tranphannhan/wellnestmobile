@@ -2,13 +2,19 @@ import { patientInformationDetails } from '@/services/lookup';
 import { medicalExaminationBook } from '@/types/lookup.type';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-
-
-export default function DetailScreen( { navigation }: any) {
+export default function DetailScreen({ navigation }: any) {
   const router = useRouter();
-  const { id } = useLocalSearchParams(); // lấy id truyền sang
+  const { id } = useLocalSearchParams();
   const [dataDetail, setDataDetail] = useState<medicalExaminationBook | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -17,9 +23,9 @@ export default function DetailScreen( { navigation }: any) {
       try {
         setLoading(true);
         const res = await patientInformationDetails(id as string);
-        setDataDetail(res [0]); // API trả về object chi tiết bệnh nhân
+        setDataDetail(res[0]); // API trả về object chi tiết bệnh nhân
       } catch (error) {
-        console.error("Lỗi load chi tiết:", error);
+        console.error('Lỗi load chi tiết:', error);
       } finally {
         setLoading(false);
       }
@@ -42,7 +48,7 @@ export default function DetailScreen( { navigation }: any) {
         <Text style={styles.error}>❌ Không tìm thấy bệnh nhân</Text>
       </View>
     );
-  } 
+  }
 
   return (
     <View style={styles.container}>
@@ -64,15 +70,22 @@ export default function DetailScreen( { navigation }: any) {
         </View>
       </ScrollView>
 
+      {/* Bottom Action */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.acceptButton}
-          onPress={() => router.push("/enterInformation")}
+        <TouchableOpacity
+          style={[styles.actionButton, styles.editButton]}
+          onPress={() => alert('ok')}
         >
-          <Text style={styles.acceptText}>Tiếp nhận</Text>
+          <Text style={styles.actionText}>Sửa thông tin</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.actionButton, styles.acceptButton]}
+          onPress={() => router.push('/enterInformation')}
+        >
+          <Text style={styles.actionText}>Tiếp nhận</Text>
         </TouchableOpacity>
       </View>
-
-
     </View>
   );
 }
@@ -91,8 +104,9 @@ const screenWidth = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFF' },
   content: { padding: 20, paddingBottom: 100 },
-  name: { fontSize: 20, fontWeight: '700', color: '#222', marginBottom: 4 },
-  role: { color: '#888', fontSize: 14, marginBottom: 20 },
+
+  name: { fontSize: 18, fontWeight: '700', color: '#222', marginBottom: 4 },
+  role: { color: '#888', fontSize: 16, marginBottom: 20 },
 
   infoCard: {
     backgroundColor: '#fff',
@@ -104,31 +118,48 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
-  infoRow: { flexDirection: 'row', marginBottom: 12 },
-  infoLabel: { fontWeight: '600', color: '#444', width: 140 },
-  infoValue: { color: '#333', flex: 1, flexWrap: 'wrap' },
+  infoRow: { flexDirection: 'row', marginBottom: 15 },
+  infoLabel: { fontWeight: '600', color: '#444', width: 140, fontSize: 16 },
+  infoValue: { color: '#333', flex: 1, flexWrap: 'wrap', fontSize: 16 },
 
   bottomBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
     position: 'absolute',
-    bottom: 40,
+    bottom: -5,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
-    padding: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    backgroundColor: 'white',
+
+    // 👇 Thêm shadow nhẹ
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 1, 
+    shadowRadius: 3,
+    elevation: 6,
+  },
+
+
+  actionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+
+  editButton: {
+    backgroundColor: '#d5ae00ff',
   },
 
   acceptButton: {
     backgroundColor: '#007A86',
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-    width: screenWidth * 0.9,
-    alignSelf: 'center',
   },
 
-  acceptText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+  actionText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  error: { fontSize: 18, color: 'red' },
+  error: { fontSize: 16, color: 'red' },
 });

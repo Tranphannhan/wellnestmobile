@@ -89,10 +89,13 @@ export default function EnterInformation() {
           placeholderTextColor="#8d8d8dff"
       />
 
+
       {/* Button */}
       <TouchableOpacity 
         style={styles.button}
         onPress={() => router.push("/confirmRoomSelection")}
+        // onPress={() => router.push("/paymentConfirmation")}
+        // onPress={() => router.push("/pay")}
       >
         
         <Text style={styles.buttonText}>Tiếp tục</Text>
@@ -124,6 +127,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 16,
     color: "#000",
+    borderWidth: 1,
+    borderColor: "#d9d9d9",
   },
 
   textArea: {
@@ -134,6 +139,8 @@ const styles = StyleSheet.create({
   pickerWrapper: {
     backgroundColor: "#fff",
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#d9d9d9",
   },
 
   button: {
@@ -150,3 +157,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
+
+
+
+// onPress={() => router.push("/confirmRoomSelection")}
+        // onPress={() => router.push("/paymentConfirmation")}
+        // onPress={() => router.push("/pay")}

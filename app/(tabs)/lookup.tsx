@@ -1,7 +1,7 @@
-import { searchMedicalExaminationBook } from '@/services/lookup';
-import { medicalExaminationBook } from '@/types/lookup.type';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { searchMedicalExaminationBook } from "@/services/lookup";
+import { medicalExaminationBook } from "@/types/lookup.type";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -10,17 +10,16 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
-const PRIMARY_COLOR = '#007A86';
+const PRIMARY_COLOR = "#007A86";
 
 export default function Lookup() {
-  const [searchText, setSearchText] = useState('');
   const router = useRouter();
 
   const [valueRender, setValueRender] = useState<medicalExaminationBook[]>([]);
-  const [searchPhone, setSearchPhone] = useState<string>('');
-  const [searchName, setSearchName] = useState<string>('');
+  const [searchPhone, setSearchPhone] = useState<string>(""); // sđt
+  const [searchName, setSearchName] = useState<string>(""); // tên bệnh nhân
   const [totalPages, setTotalPages] = useState<number>(1);
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -31,14 +30,25 @@ export default function Lookup() {
       try {
         setLoading(true);
         setError(null);
-        const response = await searchMedicalExaminationBook(searchPhone,searchName,totalPages);
-        if (response?.data.length === 0) return setValueRender ([]);
-        setValueRender (response.data)
-      } 
-      
-      catch (err: any) {
-        console.error('API error:', err);
-        setError('Không thể tải dữ liệu');
+
+        let response;
+        if (!searchPhone && !searchName) {
+          // 👉 Nếu không nhập gì thì load toàn bộ danh sách
+          response = await searchMedicalExaminationBook("", "", totalPages);
+        } else {
+          // 👉 Nếu có nhập thì search theo input
+          response = await searchMedicalExaminationBook(
+            searchPhone,
+            searchName,
+            totalPages
+          );
+        }
+
+        if (response?.data.length === 0) return setValueRender([]);
+        setValueRender(response.data);
+      } catch (err: any) {
+        console.error("API error:", err);
+        setError("Không thể tải dữ liệu");
       } finally {
         setLoading(false);
       }
@@ -46,11 +56,6 @@ export default function Lookup() {
 
     loadAPI();
   }, [searchPhone, searchName, totalPages]);
-
-  
-  const filteredData = valueRender.filter((item) =>
-    item.HoVaTen?.toLowerCase().includes(searchText.toLowerCase())
-  );
 
   const renderItem = ({ item }: { item: medicalExaminationBook }) => (
     <View style={styles.card}>
@@ -64,14 +69,14 @@ export default function Lookup() {
 
       {/* Nút xem chi tiết */}
       <TouchableOpacity
-            style={styles.detailButton}
-            onPress={() =>
-              router.push({
-                pathname: '/Patient details',
-                params: { id: item._id },
-              })
-            }
-          >
+        style={styles.detailButton}
+        onPress={() =>
+          router.push({
+            pathname: "/Patient details",
+            params: { id: item._id },
+          })
+        }
+      >
         <Text style={styles.detailButtonText}>Xem chi tiết</Text>
       </TouchableOpacity>
     </View>
@@ -79,29 +84,39 @@ export default function Lookup() {
 
   return (
     <View style={styles.container}>
+      {/* Ô nhập số điện thoại */}
+      <TextInput
+        style={styles.input}
+        placeholder="Nhập số điện thoại..."
+        value={searchPhone}
+        onChangeText={setSearchPhone}
+        keyboardType="phone-pad"
+      />
+
+      {/* Ô nhập tên bệnh nhân */}
       <TextInput
         style={styles.input}
         placeholder="Nhập tên bệnh nhân..."
-        value={searchText}
-        onChangeText={setSearchText}
-        keyboardType="default" 
+        value={searchName}
+        onChangeText={setSearchName}
+        keyboardType="default"
       />
 
       {loading && <ActivityIndicator size="large" color={PRIMARY_COLOR} />}
 
       {error && (
-        <Text style={{ color: 'red', textAlign: 'center', marginTop: 20 }}>
+        <Text style={{ color: "red", textAlign: "center", marginTop: 20 }}>
           {error}
         </Text>
       )}
 
       {!loading && !error && (
         <FlatList
-          data={filteredData}
+          data={valueRender}
           keyExtractor={(item) => String(item._id)}
           renderItem={renderItem}
           ListEmptyComponent={
-            <Text style={{ textAlign: 'center', marginTop: 20 }}>
+            <Text style={{ textAlign: "center", marginTop: 20 }}>
               Không tìm thấy kết quả.
             </Text>
           }
@@ -114,35 +129,35 @@ export default function Lookup() {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: '#F8FAFF',
+    backgroundColor: "#F8FAFF",
     flex: 1,
   },
   input: {
     padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#fff',
+    borderColor: "#ccc",
+    backgroundColor: "#fff",
     borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   card: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   info: {
     flex: 1,
   },
   name: {
-    fontWeight: '600',
+    fontWeight: "600",
     fontSize: 15,
-    color: '#000',
+    color: "#000",
   },
   role: {
     fontSize: 13,
-    color: '#777',
+    color: "#777",
   },
   detailButton: {
     backgroundColor: PRIMARY_COLOR,
@@ -152,7 +167,7 @@ const styles = StyleSheet.create({
   },
   detailButtonText: {
     fontSize: 12,
-    color: '#fff',
-    fontWeight: '500',
+    color: "#fff",
+    fontWeight: "500",
   },
 });
