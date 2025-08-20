@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     backgroundColor: '#fcfcfcff',
+    height:'100%'
   },
   label: {
     marginTop: 12,
