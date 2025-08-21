@@ -72,7 +72,7 @@ export default function Lookup() {
         style={styles.detailButton}
         onPress={() =>
           router.push({
-            pathname: "/Patient details",
+            pathname: "/PatientDetails",
             params: { id: item._id },
           })
         }

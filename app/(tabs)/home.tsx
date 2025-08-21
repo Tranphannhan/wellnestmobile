@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 
 const { height, width } = Dimensions.get("window");
@@ -46,7 +46,7 @@ export default function Home({ navigation }: any) {
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Phần trên 35% */}
       <View
         style={{
@@ -215,6 +215,6 @@ export default function Home({ navigation }: any) {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }

@@ -1,7 +1,8 @@
 import { patientInformationDetails } from '@/services/lookup';
 import { medicalExaminationBook } from '@/types/lookup.type';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -12,18 +13,20 @@ import {
   View,
 } from 'react-native';
 
-export default function DetailScreen({ navigation }: any) {
+export default function DetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const [dataDetail, setDataDetail] = useState<medicalExaminationBook | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  
 
   useEffect(() => {
     const loadAPI = async () => {
       try {
         setLoading(true);
         const res = await patientInformationDetails(id as string);
-        setDataDetail(res[0]); // API trả về object chi tiết bệnh nhân
+        setDataDetail(res[0]); 
       } catch (error) {
         console.error('Lỗi load chi tiết:', error);
       } finally {
@@ -33,6 +36,30 @@ export default function DetailScreen({ navigation }: any) {
 
     loadAPI();
   }, [id]);
+
+
+  // 👉 Hàm Edit: lưu thông tin cơ bản vào AsyncStorage
+const Edit = useCallback(async () => {
+  try {
+    const info = {
+      hoTen: dataDetail?.HoVaTen || "",
+      gioiTinh: dataDetail?.GioiTinh || "Nam",
+      ngaySinh: dataDetail?.NgaySinh || "",
+      soBHYT: dataDetail?.SoBaoHiemYTe || "",
+      soDienThoai: dataDetail?.SoDienThoai || "",
+      soCCCD: dataDetail?.SoCCCD || "",
+      sdtNguoiThan: dataDetail?.SDT_NguoiThan || "",
+      diaChi: dataDetail?.DiaChi || "",
+      lichSuBenh: dataDetail?.LichSuBenh || "",
+    };
+    await AsyncStorage.setItem("patientInfo", JSON.stringify(info));
+    router.push("/(tabs)/editPatientInformation"); // 👈 đổi đường dẫn đúng theo cấu trúc thư mục
+  } catch (e) {
+    console.error("Lỗi lưu AsyncStorage:", e);
+  }
+}, [router, dataDetail]);
+
+
 
   if (loading) {
     return (
@@ -49,6 +76,8 @@ export default function DetailScreen({ navigation }: any) {
       </View>
     );
   }
+
+  
 
   return (
     <View style={styles.container}>
@@ -74,7 +103,7 @@ export default function DetailScreen({ navigation }: any) {
       <View style={styles.bottomBar}>
         <TouchableOpacity
           style={[styles.actionButton, styles.editButton]}
-          onPress={() => alert('ok')}
+          onPress={Edit}
         >
           <Text style={styles.actionText}>Sửa thông tin</Text>
         </TouchableOpacity>
@@ -134,15 +163,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
     backgroundColor: 'white',
-
-    // 👇 Thêm shadow nhẹ
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 1, 
+    shadowOpacity: 0.1, 
     shadowRadius: 3,
     elevation: 6,
   },
-
 
   actionButton: {
     flex: 1,

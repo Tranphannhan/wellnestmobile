@@ -33,6 +33,8 @@ export default function TabLayout() {
         }}
       />
 
+        
+      {/* Tra cứu bệnh nhân */}
       <Tabs.Screen
         name="lookup"
         options={{
@@ -46,18 +48,34 @@ export default function TabLayout() {
         }}
       />
 
+
+      {/* quét mã QR Code */}
       <Tabs.Screen
         name="qrcode"
         options={{
-          title: "",
+          title: "Quét mã",
+            tabBarStyle: { display: 'none' },
           tabBarButton: (props) => (
             <NoRippleButton {...(props as BottomTabBarButtonProps)} />
           ),
+              tabBarLabel: () => null,
+
+            headerLeft: () => (
+            <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => router.replace('/home')} // Luôn điều hướng về tab Tra cứu
+              >
+              <Ionicons name="arrow-back" size={22} color="#494949" />
+              <Text style={styles.backText}></Text>
+            </TouchableOpacity>
+          ),
+          
           tabBarIcon: ({ focused }) => (
             <View style={styles.qrWrapper}>
               <View style={styles.qrButton}>
                 <IconSymbol name="qrcode" color="#fff" size={30} />
               </View>
+
               <Text
                 style={[styles.qrLabel, { color: focused ? "#000" : "#333" }]}
               >
@@ -68,6 +86,8 @@ export default function TabLayout() {
         }}
       />
 
+
+      {/* Tạo thủ công */}
       <Tabs.Screen
         name="createmanually"
         options={{
@@ -80,6 +100,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
 
       {/* Thông tin tài khoản */}
       <Tabs.Screen
@@ -98,10 +119,30 @@ export default function TabLayout() {
       
       {/* Thông tin bệnh nhân */}
       <Tabs.Screen
-        name="Patient details"
+        name="PatientDetails"
         options={{
           href: null,
           title: 'Thông tin bệnh nhân',
+           tabBarStyle: { display: 'none' },
+          headerLeft: () => (
+            <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => router.replace('/lookup')} // Luôn điều hướng về tab Tra cứu
+              >
+              <Ionicons name="arrow-back" size={22} color="#494949" />
+              <Text style={styles.backText}></Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
+ 
+
+      {/* Cập nhật thông tin bệnh nhân */}
+      <Tabs.Screen
+        name="editPatientInformation"
+        options={{
+          href: null,
+          title: 'Cập nhật thông tin',
            tabBarStyle: { display: 'none' },
           headerLeft: () => (
             <TouchableOpacity
@@ -114,8 +155,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
-
       
       {/* Thanh toán */}
       <Tabs.Screen
