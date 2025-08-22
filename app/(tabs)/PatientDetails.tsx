@@ -53,7 +53,7 @@ const Edit = useCallback(async () => {
       lichSuBenh: dataDetail?.LichSuBenh || "",
     };
     await AsyncStorage.setItem("patientInfo", JSON.stringify(info));
-    router.push("/(tabs)/editPatientInformation"); // 👈 đổi đường dẫn đúng theo cấu trúc thư mục
+    router.push("/editPatientInformation");
   } catch (e) {
     console.error("Lỗi lưu AsyncStorage:", e);
   }

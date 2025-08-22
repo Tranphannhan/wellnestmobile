@@ -10,38 +10,52 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 
 export default function EnterInformation() {
   const router = useRouter();
-  const [dataDepartment , setDataDepartment] = useState <FacultyselectionlistType []> ([])
+  const [dataDepartment, setDataDepartment] = useState<
+    FacultyselectionlistType[]
+  >([]);
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [department, setDepartment] = useState("");
   const [reason, setReason] = useState("");
 
-  useEffect (() => {
-      const LoadingAPI = async () => {
-          const GetAPI = await Facultyselectionlist ();
-          if (GetAPI.data.length === 0) return setDataDepartment ([]);
-          setDataDepartment (GetAPI.data)
-      }
-      
-      LoadingAPI ();
+  useEffect(() => {
+    const LoadingAPI = async () => {
+      const GetAPI = await Facultyselectionlist();
+      if (GetAPI.data.length === 0) return setDataDepartment([]);
+      setDataDepartment(GetAPI.data);
+    };
 
+    LoadingAPI();
   }, []);
- 
+
+  const handleNext = () => {
+    if (!department) {
+      Alert.alert("Thông báo", "Vui lòng chọn khoa trước khi tiếp tục");
+      return;
+    }
+
+    router.push({
+      pathname: "/confirmRoomSelection",
+      params: { idKhoa: department },
+    });
+  };
+
   return (
-      <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       {/* Chiều cao */}
       <Text style={styles.label}>Chiều cao (cm)</Text>
       <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={height}
-          onChangeText={setHeight}
-          placeholder="Nhập chiều cao"
-          placeholderTextColor="#8d8d8dff"
+        style={styles.input}
+        keyboardType="numeric"
+        value={height}
+        onChangeText={setHeight}
+        placeholder="Nhập chiều cao"
+        placeholderTextColor="#8d8d8dff"
       />
 
       {/* Cân nặng */}
@@ -58,50 +72,34 @@ export default function EnterInformation() {
       {/* Chọn khoa */}
       <Text style={styles.label}>Chọn khoa</Text>
       <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={department}
-            onValueChange={(itemValue) => setDepartment(itemValue)}
-          >
-              
-              <Picker.Item label="--- Chọn khoa ---" value="" />
-              {
-                  dataDepartment.map ((item , index) => (
-                      <Picker.Item 
-                          key={item._id}
-                          label={item.TenKhoa}
-                          value={item._id} 
-                      />
-                  ))
-              }
-              
-          </Picker>
+        <Picker
+          selectedValue={department}
+          onValueChange={(itemValue) => setDepartment(itemValue)}
+        >
+          <Picker.Item label="--- Chọn khoa ---" value="" />
+          {dataDepartment.map((item) => (
+            <Picker.Item key={item._id} label={item.TenKhoa} value={item._id} />
+          ))}
+        </Picker>
       </View>
 
       {/* Lý do đến khám */}
       <Text style={styles.label}>Lý do đến khám</Text>
       <TextInput
-          style={[styles.input, styles.textArea]}
-          multiline
-          numberOfLines={4}
-          value={reason}
-          onChangeText={setReason}
-          placeholder="Nhập nội dung..."
-          placeholderTextColor="#8d8d8dff"
+        style={[styles.input, styles.textArea]}
+        multiline
+        numberOfLines={4}
+        value={reason}
+        onChangeText={setReason}
+        placeholder="Nhập nội dung..."
+        placeholderTextColor="#8d8d8dff"
       />
 
-
       {/* Button */}
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={() => router.push("/confirmRoomSelection")}
-        // onPress={() => router.push("/paymentConfirmation")}
-        // onPress={() => router.push("/pay")}
-      >
-        
+      <TouchableOpacity style={styles.button} onPress={handleNext}>
         <Text style={styles.buttonText}>Tiếp tục</Text>
       </TouchableOpacity>
-      </ScrollView>
-
+    </ScrollView>
   );
 }
 
@@ -109,17 +107,14 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#F8FAFF',
+    backgroundColor: "#F8FAFF",
   },
-
-
   label: {
     color: "#646464ff",
     fontSize: 16,
     marginBottom: 5,
     marginTop: 15,
   },
-
   input: {
     backgroundColor: "#fff",
     borderRadius: 10,
@@ -130,26 +125,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#d9d9d9",
   },
-
   textArea: {
     height: 100,
     textAlignVertical: "top",
   },
-
   pickerWrapper: {
     backgroundColor: "#fff",
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#d9d9d9",
   },
-
   button: {
-    backgroundColor:'#007A86',
+    backgroundColor: "#007A86",
     paddingVertical: 15,
     borderRadius: 10,
     marginTop: 30,
   },
-
   buttonText: {
     color: "#fff",
     fontSize: 18,
@@ -157,10 +148,3 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
-
-
-
-// onPress={() => router.push("/confirmRoomSelection")}
-        // onPress={() => router.push("/paymentConfirmation")}
-        // onPress={() => router.push("/pay")}

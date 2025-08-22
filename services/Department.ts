@@ -4,7 +4,7 @@ console.log(API_BASE_URL);
 // Danh sách khoa
 export async function Facultyselectionlist () {
     try{
-        const respone = await fetch(`https://bewellnest.onrender.com/Khoa/Pagination?TrangThaiHoatDong=true`);
+        const respone = await fetch(`https://bewellnest.onrender.com/Khoa/Pagination?TrangThaiHoatDong=true&limit=1000`);
         if(respone.ok){
             return (await respone.json())
         }
