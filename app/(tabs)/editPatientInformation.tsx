@@ -3,11 +3,20 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Card } from "react-native-paper";
 
 export default function EditPatientInformation() {
   const router = useRouter();
+
   const [form, setForm] = useState({
     hoTen: "",
     gioiTinh: "Nam",
@@ -19,15 +28,15 @@ export default function EditPatientInformation() {
     diaChi: "",
     lichSuBenh: "",
   });
-  
 
-  // 🔹 Load dữ liệu đã lưu trước đó (nếu có)
+  // 🔹 Load dữ liệu 3 trường từ DetailScreen
   useEffect(() => {
     (async () => {
       try {
         const saved = await AsyncStorage.getItem("patientInfo");
         if (saved) {
-          setForm(JSON.parse(saved));
+          const parsed = JSON.parse(saved);
+          setForm((prev) => ({ ...prev, ...parsed })); // merge để field khác rỗng
         }
       } catch (error) {
         console.log("Lỗi load dữ liệu:", error);
@@ -39,20 +48,64 @@ export default function EditPatientInformation() {
     setForm({ ...form, [field]: value });
   };
 
+  // ✅ Validate trước khi lưu
+  const validateForm = () => {
+    if (!form.hoTen.trim()) {
+      Alert.alert("⚠️ Lỗi", "Vui lòng nhập họ và tên");
+      return false;
+    }
+    if (form.soDienThoai && !/^[0-9]{9,11}$/.test(form.soDienThoai)) {
+      Alert.alert("⚠️ Lỗi", "Số điện thoại không hợp lệ");
+      return false;
+    }
+    if (form.ngaySinh && !/^\d{2}\/\d{2}\/\d{4}$/.test(form.ngaySinh)) {
+      Alert.alert("⚠️ Lỗi", "Ngày sinh phải đúng định dạng dd/mm/yyyy");
+      return false;
+    }
+    return true;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) return;
     try {
       await AsyncStorage.setItem("patientInfo", JSON.stringify(form));
-      Alert.alert("✅ Thành công", "Đã lưu thông tin");
-    //   router.push("/PatientInfoScreen"); // chuyển sang trang hiển thị
-    
+      Alert.alert("✅ Thành công", "Đã lưu thông tin", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
     } catch (error) {
-        console.log(error);
+      console.log(error);
       Alert.alert("❌ Lỗi", "Không thể lưu dữ liệu");
     }
   };
 
+  const handleReset = async () => {
+    Alert.alert("🗑 Xóa dữ liệu", "Bạn có chắc muốn xóa hết thông tin?", [
+      { text: "Hủy" },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: async () => {
+          await AsyncStorage.removeItem("patientInfo");
+          setForm({
+            hoTen: "",
+            gioiTinh: "Nam",
+            soBHYT: "",
+            soDienThoai: "",
+            soCCCD: "",
+            ngaySinh: "",
+            sdtNguoiThan: "",
+            diaChi: "",
+            lichSuBenh: "",
+          });
+        },
+      },
+    ]);
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
+      <Text style={styles.header}>📝 Cập nhật thông tin bệnh nhân</Text>
+
       {/* Họ tên */}
       <Card style={styles.card}>
         <Text style={styles.label}>Họ và tên</Text>
@@ -76,7 +129,6 @@ export default function EditPatientInformation() {
               onChangeText={(val) => handleChange("ngaySinh", val)}
             />
           </View>
-
           <View style={styles.flexItem}>
             <Text style={styles.label}>Giới tính</Text>
             <View style={styles.pickerWrapper}>
@@ -107,7 +159,6 @@ export default function EditPatientInformation() {
               onChangeText={(val) => handleChange("soBHYT", val)}
             />
           </View>
-
           <View style={styles.flexItem}>
             <Text style={styles.label}>Số CCCD</Text>
             <TextInput
@@ -134,7 +185,6 @@ export default function EditPatientInformation() {
               onChangeText={(val) => handleChange("soDienThoai", val)}
             />
           </View>
-
           <View style={styles.flexItem}>
             <Text style={styles.label}>SĐT người thân</Text>
             <TextInput
@@ -171,23 +221,31 @@ export default function EditPatientInformation() {
         />
       </Card>
 
-      {/* Nút Lưu */}
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <MaterialCommunityIcons name="content-save" size={20} color="white" />
-        <Text style={styles.buttonText}>Lưu thông tin</Text>
-      </TouchableOpacity>
+      {/* Nút hành động */}
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <TouchableOpacity style={[styles.button, { backgroundColor: "#007A86", flex: 1, marginRight: 8 }]} onPress={handleSave}>
+          <MaterialCommunityIcons name="content-save" size={20} color="white" />
+          <Text style={styles.buttonText}>Lưu thông tin</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.button, { backgroundColor: "#d9534f", flex: 0.5 }]} onPress={handleReset}>
+          <MaterialCommunityIcons name="delete" size={20} color="white" />
+          <Text style={styles.buttonText}>Xóa</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f6fa", padding: 16, marginBottom: 70 },
+  container: { flex: 1, backgroundColor: "#f5f6fa", padding: 16 },
+  header: { fontSize: 18, fontWeight: "700", marginBottom: 16, color: "#007A86" },
   card: { padding: 12, marginBottom: 12, borderRadius: 12, backgroundColor: "#fff", elevation: 2 },
   label: { fontSize: 14, fontWeight: "500", marginBottom: 6, color: "#333" },
   input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, padding: 10, fontSize: 14, backgroundColor: "#fafafa" },
   pickerWrapper: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, overflow: "hidden" },
   row: { flexDirection: "row", justifyContent: "space-between" },
   flexItem: { flex: 1 },
-  button: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "#007A86", padding: 14, borderRadius: 12, marginTop: 20 },
+  button: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, borderRadius: 12, marginTop: 20 },
   buttonText: { color: "white", fontWeight: "600", marginLeft: 8 },
 });

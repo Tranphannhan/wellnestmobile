@@ -2,7 +2,7 @@ import { patientInformationDetails } from '@/services/lookup';
 import { medicalExaminationBook } from '@/types/lookup.type';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -18,8 +18,7 @@ export default function DetailScreen() {
   const { id } = useLocalSearchParams();
   const [dataDetail, setDataDetail] = useState<medicalExaminationBook | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
-  
+ 
 
   useEffect(() => {
     const loadAPI = async () => {
@@ -37,8 +36,9 @@ export default function DetailScreen() {
     loadAPI();
   }, [id]);
 
-
+  
   // 👉 Hàm Edit: lưu thông tin cơ bản vào AsyncStorage
+<<<<<<< HEAD
 const Edit = useCallback(async () => {
   try {
     const info = {
@@ -58,6 +58,23 @@ const Edit = useCallback(async () => {
     console.error("Lỗi lưu AsyncStorage:", e);
   }
 }, [router, dataDetail]);
+=======
+    const Edit = async () => {
+    try {
+      if (!dataDetail) return;
+      const info = {
+        hoTen: dataDetail.HoVaTen || "",
+        gioiTinh: dataDetail.GioiTinh || "Nam",
+        ngaySinh: dataDetail.NgaySinh || "",
+      };
+      await AsyncStorage.setItem("patientInfo", JSON.stringify(info));
+      router.push("/(tabs)/editPatientInformation");
+    } catch (e) {
+      console.error("Lỗi lưu AsyncStorage:", e);
+    }
+  };
+
+>>>>>>> facd6dbe917caec9ebeeb43aa0e80fb81e767b6c
 
 
 
