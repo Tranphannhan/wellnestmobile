@@ -1,33 +1,33 @@
-import { patientInformationDetails } from '@/services/lookup';
-import { medicalExaminationBook } from '@/types/lookup.type';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { patientInformationDetails } from "@/services/lookup";
+import { medicalExaminationBook } from "@/types/lookup.type";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
 export default function DetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const [dataDetail, setDataDetail] = useState<medicalExaminationBook | null>(null);
+  const [dataDetail, setDataDetail] = useState<medicalExaminationBook | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(false);
- 
 
   useEffect(() => {
     const loadAPI = async () => {
       try {
         setLoading(true);
         const res = await patientInformationDetails(id as string);
-        setDataDetail(res[0]); 
+        setDataDetail(res[0]);
       } catch (error) {
-        console.error('Lỗi load chi tiết:', error);
+        console.error("Lỗi load chi tiết:", error);
       } finally {
         setLoading(false);
       }
@@ -36,30 +36,8 @@ export default function DetailScreen() {
     loadAPI();
   }, [id]);
 
-  
   // 👉 Hàm Edit: lưu thông tin cơ bản vào AsyncStorage
-<<<<<<< HEAD
-const Edit = useCallback(async () => {
-  try {
-    const info = {
-      hoTen: dataDetail?.HoVaTen || "",
-      gioiTinh: dataDetail?.GioiTinh || "Nam",
-      ngaySinh: dataDetail?.NgaySinh || "",
-      soBHYT: dataDetail?.SoBaoHiemYTe || "",
-      soDienThoai: dataDetail?.SoDienThoai || "",
-      soCCCD: dataDetail?.SoCCCD || "",
-      sdtNguoiThan: dataDetail?.SDT_NguoiThan || "",
-      diaChi: dataDetail?.DiaChi || "",
-      lichSuBenh: dataDetail?.LichSuBenh || "",
-    };
-    await AsyncStorage.setItem("patientInfo", JSON.stringify(info));
-    router.push("/editPatientInformation");
-  } catch (e) {
-    console.error("Lỗi lưu AsyncStorage:", e);
-  }
-}, [router, dataDetail]);
-=======
-    const Edit = async () => {
+  const Edit = async () => {
     try {
       if (!dataDetail) return;
       const info = {
@@ -73,10 +51,6 @@ const Edit = useCallback(async () => {
       console.error("Lỗi lưu AsyncStorage:", e);
     }
   };
-
->>>>>>> facd6dbe917caec9ebeeb43aa0e80fb81e767b6c
-
-
 
   if (loading) {
     return (
@@ -93,8 +67,6 @@ const Edit = useCallback(async () => {
       </View>
     );
   }
-
-  
 
   return (
     <View style={styles.container}>
@@ -127,7 +99,19 @@ const Edit = useCallback(async () => {
 
         <TouchableOpacity
           style={[styles.actionButton, styles.acceptButton]}
-          onPress={() => router.push('/enterInformation')}
+          onPress={async () => {
+            try {
+              if (dataDetail) {
+                await AsyncStorage.setItem(
+                  "patientDetail",
+                  JSON.stringify(dataDetail)
+                );
+                router.push("/enterInformation");
+              }
+            } catch (e) {
+              console.error("Lỗi lưu thông tin bệnh nhân:", e);
+            }
+          }}
         >
           <Text style={styles.actionText}>Tiếp nhận</Text>
         </TouchableOpacity>
@@ -140,49 +124,47 @@ function InfoRow({ label, value }: { label: string; value?: string }) {
   return (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}:</Text>
-      <Text style={styles.infoValue}>{value || '---'}</Text>
+      <Text style={styles.infoValue}>{value || "---"}</Text>
     </View>
   );
 }
 
-const screenWidth = Dimensions.get('window').width;
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFF' },
+  container: { flex: 1, backgroundColor: "#F8FAFF" },
   content: { padding: 20, paddingBottom: 100 },
 
-  name: { fontSize: 18, fontWeight: '700', color: '#222', marginBottom: 4 },
-  role: { color: '#888', fontSize: 16, marginBottom: 20 },
+  name: { fontSize: 18, fontWeight: "700", color: "#222", marginBottom: 4 },
+  role: { color: "#888", fontSize: 16, marginBottom: 20 },
 
   infoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     borderRadius: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
   },
 
-  infoRow: { flexDirection: 'row', marginBottom: 15 },
-  infoLabel: { fontWeight: '600', color: '#444', width: 140, fontSize: 16 },
-  infoValue: { color: '#333', flex: 1, flexWrap: 'wrap', fontSize: 16 },
+  infoRow: { flexDirection: "row", marginBottom: 15 },
+  infoLabel: { fontWeight: "600", color: "#444", width: 140, fontSize: 16 },
+  infoValue: { color: "#333", flex: 1, flexWrap: "wrap", fontSize: 16 },
 
   bottomBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     gap: 12,
-    position: 'absolute',
+    position: "absolute",
     bottom: -5,
     left: 0,
     right: 0,
     paddingVertical: 12,
     paddingHorizontal: 20,
     paddingBottom: 40,
-    backgroundColor: 'white',
-    shadowColor: '#000',
+    backgroundColor: "white",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1, 
+    shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 6,
   },
@@ -191,18 +173,18 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
 
   editButton: {
-    backgroundColor: '#d5ae00ff',
+    backgroundColor: "#d5ae00ff",
   },
 
   acceptButton: {
-    backgroundColor: '#007A86',
+    backgroundColor: "#007A86",
   },
 
-  actionText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  error: { fontSize: 16, color: 'red' },
+  actionText: { color: "#fff", fontWeight: "600", fontSize: 14 },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  error: { fontSize: 16, color: "red" },
 });

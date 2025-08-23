@@ -1,21 +1,20 @@
 import { getAllChooseRooms } from "@/services/confirmRoomSelection";
 import { receptionTemporaryDoctorTypes } from "@/types/confirmRoomSelection";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   ActivityIndicator,
 } from "react-native";
 
 export default function ChooseRoomMobile() {
   const [rooms, setRooms] = useState<receptionTemporaryDoctorTypes[]>([]);
-  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const { idKhoa } = useLocalSearchParams();
+  const router = useRouter()
 
   const MAX_PATIENTS = 10;
   const MINUTES_PER_PATIENT = 15;
@@ -25,13 +24,15 @@ export default function ChooseRoomMobile() {
       if (!idKhoa) return;
       try {
         setLoading(true);
-        const data = await getAllChooseRooms(idKhoa as string, 1); // currentPage = 1
-           console.log('Data trả về',data)
+        const data = await getAllChooseRooms(idKhoa as string, 1);
         if (data && data.data) {
-          setRooms(data.data); // data.data giả sử API trả về { data: [], currentPage, totalPages }
+          // Sắp xếp theo số người đang khám (ít -> nhiều)
+          const sortedRooms = [...data.data].sort(
+            (a, b) => a.SoNguoiDangKham - b.SoNguoiDangKham
+          );
+          setRooms(sortedRooms);
         }
       } catch (error) {
-     
         console.error("Lỗi khi lấy phòng:", error);
       } finally {
         setLoading(false);
@@ -55,9 +56,14 @@ export default function ChooseRoomMobile() {
     return mins === 0 ? `${hours} tiếng` : `${hours} tiếng ${mins} phút`;
   };
 
-  const renderItem = ({ item }: { item: receptionTemporaryDoctorTypes }) => {
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: receptionTemporaryDoctorTypes;
+    index: number;
+  }) => {
     const isFull = item.SoNguoiDangKham >= MAX_PATIENTS;
-    const isSelected = selectedRoom === item._id;
     const estimateMinutes = item.SoNguoiDangKham * MINUTES_PER_PATIENT;
 
     return (
@@ -115,20 +121,17 @@ export default function ChooseRoomMobile() {
             </Text>
           </View>
 
-          <TouchableOpacity
+          <View
             style={[
               styles.button,
-              isSelected && styles.buttonSelected,
               isFull && styles.buttonDisabled,
+              index === 0 && !isFull && styles.buttonSelected, // phòng ít bệnh nhân nhất => Ưu tiên
             ]}
-            disabled={isFull}
-            onPress={() => setSelectedRoom(item._id)}
-            activeOpacity={0.8}
           >
-            <Text style={styles.buttonText}>
-              {isFull ? "Đã đầy" : isSelected ? "Ưu tiên" : "Chọn phòng"}
+            <Text style={styles.buttonText} onPress={() => router.push("/paymentConfirmation")}>
+              {isFull ? "Đã đầy" : index === 0 ? "Ưu tiên" : "Chọn phòng"}
             </Text>
-          </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -165,18 +168,48 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
-  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
   statusDot: { width: 8, height: 8, borderRadius: 5, marginRight: 8 },
-  doctor: { fontSize: 18, fontWeight: "600", color: "#1d1d1dff", maxWidth: "80%" },
+  doctor: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1d1d1dff",
+    maxWidth: "80%",
+  },
   roomNumber: { fontSize: 16, fontWeight: "500", color: "#009f9fff" },
   font: { fontSize: 16, color: "#444", marginVertical: 2 },
   bold: { fontWeight: "600", color: "#222" },
-  status: { borderRadius: 8, paddingVertical: 4, paddingHorizontal: 10, alignSelf: "flex-start", marginTop: 8, flexDirection: "row", alignItems: "center" },
+  status: {
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    alignSelf: "flex-start",
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   statusText: { fontWeight: "600", color: "#000", fontSize: 14 },
   statusGreen: { backgroundColor: "#caffd6ff" },
   statusOrange: { backgroundColor: "#fff2caff" },
   statusRed: { backgroundColor: "#ffc0c6ff" },
-  button: { marginTop: 12, marginLeft: "auto", paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8, backgroundColor: "#009f9fff", alignItems: "center", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3, alignSelf: "flex-start" },
+  button: {
+    marginTop: 12,
+    marginLeft: "auto",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    backgroundColor: "#009f9fff",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    alignSelf: "flex-start",
+  },
   buttonSelected: { backgroundColor: "#00cb29ff" },
   buttonDisabled: { backgroundColor: "#888" },
   buttonText: { color: "#fff", fontWeight: "700", fontSize: 14 },

@@ -1,7 +1,16 @@
+import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function PaymentConfirmation() {
+  const router = useRouter()
   const patient = {
     name: "Nguyễn Thị Hồng Nhung",
     cccd: "038123456789",
@@ -24,59 +33,73 @@ export default function PaymentConfirmation() {
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* <Text style={styles.title}>Xác nhận thông tin thanh toán</Text> */}
+    <View style={styles.container}>
+      {/* Nội dung scroll */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.grid}>
+          <InputField label="Họ và tên" value={patient.name} />
+          <InputField label="Số CCCD" value={patient.cccd} />
+        </View>
 
-      <View style={styles.grid}>
-        <InputField label="Họ và tên" value={patient.name} />
-        <InputField label="Số CCCD" value={patient.cccd} />
-      </View>
+        <View style={styles.grid}>
+          <InputField label="Ngày sinh" value={patient.dob} />
+          <InputField label="Số điện thoại" value={patient.phone} />
+        </View>
 
-      <View style={styles.grid}>
-        <InputField label="Ngày sinh" value={patient.dob} />
-        <InputField label="Số điện thoại" value={patient.phone} />
-      </View>
+        <View style={styles.grid}>
+          <InputField label="Giới tính" value={patient.gender} />
+          <InputField label="Chiều cao" value={patient.height + " cm"} />
+        </View>
 
-      <View style={styles.grid}>
-        <InputField label="Giới tính" value={patient.gender} />
-        <InputField label="Chiều cao" value={patient.height + " cm"} />
-      </View>
+        <View style={styles.grid}>
+          <InputField label="Cân nặng" value={patient.weight + " kg"} />
+          <InputField label="Phòng khám" value={patient.clinic} />
+        </View>
 
-      <View style={styles.grid}>
-        <InputField label="Cân nặng" value={patient.weight + " kg"} />
-        <InputField label="Phòng khám" value={patient.clinic} />
-      </View>
+        <InputField label="Khoa" value={patient.department} />
+        <InputField label="Địa chỉ" value={patient.address} />
+        <View style={styles.field}>
+          <Text style={styles.label}>Lí do đến khám</Text>
+          <TextInput
+            value={patient.reason}
+            editable={false}
+            multiline
+            numberOfLines={3}
+            style={[styles.input, styles.textarea]}
+          />
+        </View>
+      </ScrollView>
 
-      <InputField label="Khoa" value={patient.department} />
-      <InputField label="Địa chỉ" value={patient.address} />
-      <InputField label="Lí do đến khám" value={patient.reason} />
-
+      {/* Nút cố định dưới cùng */}
       <View style={styles.actions}>
-        <TouchableOpacity style={[styles.btn, styles.btnCancel]}>
+        <TouchableOpacity onPress={()=>{router.push('/home')}}  style={[styles.btn, styles.btnCancel]}>
           <Text style={styles.btnText}>Không thanh toán</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.btn, styles.btnConfirm]}>
+        <TouchableOpacity onPress={()=>{}} style={[styles.btn, styles.btnConfirm]}>
           <Text style={styles.btnText}>Xác nhận đã thanh toán</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1, // chiếm toàn màn hình
     backgroundColor: "#fff",
   },
 
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 20,
-    textAlign: "center",
+  textarea: {
+    minHeight: 90,
+    textAlignVertical: "top", // để text bắt đầu từ trên
   },
+
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 100, // chừa chỗ cho button cố định
+  },
+
   grid: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -86,7 +109,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: 15,
   },
-  
+
   label: {
     fontSize: 14,
     color: "#555",
@@ -105,17 +128,23 @@ const styles = StyleSheet.create({
 
   actions: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 20,
-    marginBottom : 60,
-    gap: 12,
+    justifyContent: "space-between",
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: "#eee",
+    backgroundColor: "#fff",
+    paddingBottom: 30,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 
-
   btn: {
+    flex: 1,
     paddingVertical: 12,
-    paddingHorizontal: 16,
     borderRadius: 8,
+    marginHorizontal: 5,
   },
   btnCancel: {
     backgroundColor: "#e74c3c",
