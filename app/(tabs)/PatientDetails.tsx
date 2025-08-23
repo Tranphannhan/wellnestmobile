@@ -38,27 +38,27 @@ export default function DetailScreen() {
 
   
   // 👉 Hàm Edit: lưu thông tin cơ bản vào AsyncStorage
-<<<<<<< HEAD
-const Edit = useCallback(async () => {
-  try {
-    const info = {
-      hoTen: dataDetail?.HoVaTen || "",
-      gioiTinh: dataDetail?.GioiTinh || "Nam",
-      ngaySinh: dataDetail?.NgaySinh || "",
-      soBHYT: dataDetail?.SoBaoHiemYTe || "",
-      soDienThoai: dataDetail?.SoDienThoai || "",
-      soCCCD: dataDetail?.SoCCCD || "",
-      sdtNguoiThan: dataDetail?.SDT_NguoiThan || "",
-      diaChi: dataDetail?.DiaChi || "",
-      lichSuBenh: dataDetail?.LichSuBenh || "",
-    };
-    await AsyncStorage.setItem("patientInfo", JSON.stringify(info));
-    router.push("/editPatientInformation");
-  } catch (e) {
-    console.error("Lỗi lưu AsyncStorage:", e);
-  }
-}, [router, dataDetail]);
-=======
+// <<<<<<< HEAD
+// const Edit = useCallback (async () => {
+//   try {
+//     const info = {
+//       hoTen: dataDetail?.HoVaTen || "",
+//       gioiTinh: dataDetail?.GioiTinh || "Nam",
+//       ngaySinh: dataDetail?.NgaySinh || "",
+//       soBHYT: dataDetail?.SoBaoHiemYTe || "",
+//       soDienThoai: dataDetail?.SoDienThoai || "",
+//       soCCCD: dataDetail?.SoCCCD || "",
+//       sdtNguoiThan: dataDetail?.SDT_NguoiThan || "",
+//       diaChi: dataDetail?.DiaChi || "",
+//       lichSuBenh: dataDetail?.LichSuBenh || "",
+//     };
+//     await AsyncStorage.setItem("patientInfo", JSON.stringify(info));
+//     router.push("/editPatientInformation");
+//   } catch (e) {
+//     console.error("Lỗi lưu AsyncStorage:", e);
+//   }
+// }, [router, dataDetail])
+
     const Edit = async () => {
     try {
       if (!dataDetail) return;
@@ -74,7 +74,6 @@ const Edit = useCallback(async () => {
     }
   };
 
->>>>>>> facd6dbe917caec9ebeeb43aa0e80fb81e767b6c
 
 
 
