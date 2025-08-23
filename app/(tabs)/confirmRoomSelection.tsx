@@ -14,10 +14,14 @@ export default function ChooseRoomMobile() {
   const [rooms, setRooms] = useState<receptionTemporaryDoctorTypes[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { idKhoa } = useLocalSearchParams();
-  const router = useRouter()
+  const router = useRouter();
 
   const MAX_PATIENTS = 10;
   const MINUTES_PER_PATIENT = 15;
+
+  function handleNext(room:string) {
+    alert(room);
+  }
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -128,7 +132,11 @@ export default function ChooseRoomMobile() {
               index === 0 && !isFull && styles.buttonSelected, // phòng ít bệnh nhân nhất => Ưu tiên
             ]}
           >
-            <Text style={styles.buttonText} onPress={() => router.push("/paymentConfirmation")}>
+            <Text
+              style={styles.buttonText}
+              onPress={()=>{handleNext(item._id)}}
+              // router.push("/paymentConfirmation")
+            >
               {isFull ? "Đã đầy" : index === 0 ? "Ưu tiên" : "Chọn phòng"}
             </Text>
           </View>
