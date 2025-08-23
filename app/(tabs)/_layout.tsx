@@ -34,6 +34,7 @@ export default function TabLayout() {
       />
 
         
+        
       {/* Tra cứu bệnh nhân */}
       <Tabs.Screen
         name="lookup"
@@ -47,7 +48,7 @@ export default function TabLayout() {
           ),
         }}
       />
-
+      
 
       {/* quét mã QR Code */}
       <Tabs.Screen

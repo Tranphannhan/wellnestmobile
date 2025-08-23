@@ -5,7 +5,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export async function searchMedicalExaminationBook(phone:string,name:string,page:number = 1) {
     console.log(API_BASE_URL);
     try{
-        const respone = await fetch(`${'https://bewellnest.onrender.com'}/The_Kham_Benh/TimKiemSoKhamBenh/Pagination?sdt=${phone}&ten=${name}&page=${page}&limit=15`);
+        const respone = await fetch(`${'https://bewellnest.onrender.com'}/The_Kham_Benh/TimKiemSoKhamBenh/Pagination?sdt=${phone}&ten=${name}&page=${page}&limit=10000`);
         if(respone.ok){
         return (await respone.json())
         }else{
