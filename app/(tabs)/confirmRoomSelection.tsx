@@ -1,26 +1,34 @@
 import { getAllChooseRooms } from "@/services/confirmRoomSelection";
 import { receptionTemporaryDoctorTypes } from "@/types/confirmRoomSelection";
+import { medicalExaminationBook } from "@/types/lookup.type";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
   View,
-  ActivityIndicator,
 } from "react-native";
 
 export default function ChooseRoomMobile() {
   const [rooms, setRooms] = useState<receptionTemporaryDoctorTypes[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const { idKhoa } = useLocalSearchParams();
+  const { idKhoa, reason} = useLocalSearchParams();
   const router = useRouter();
 
   const MAX_PATIENTS = 10;
   const MINUTES_PER_PATIENT = 15;
 
-  function handleNext(room:string) {
+  async function handleNext(room:string) {
+    const dataLocal = await AsyncStorage.getItem("patientDetail");
+    const jsonDataLocal: medicalExaminationBook = dataLocal ? JSON.parse(dataLocal) : null;
+
     alert(room);
+    alert(reason);
+    alert(JSON.stringify(jsonDataLocal._id));
+
   }
 
   useEffect(() => {
