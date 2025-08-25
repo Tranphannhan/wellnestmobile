@@ -22,22 +22,18 @@ export default function PatientInformationDetails() {
       const saved = await AsyncStorage.getItem("patientInfo");
       if (saved) {
         const parsed = JSON.parse(saved);
-        console.log("📌 Dữ liệu mới load từ AsyncStorage:", parsed);
-
         setPatient({
-          _id : parsed._id || "",
-          hoTen: parsed.hoTen || "",
-          ngaySinh: parsed.ngaySinh || "",
-          gioiTinh: parsed.gioiTinh || "",
-          soBHYT: parsed.soBHYT || "",
-          soCCCD: parsed.soCCCD || "",
-          soDienThoai: parsed.soDienThoai || "",
-          sdtNguoiThan: parsed.sdtNguoiThan || "",
-          diaChi: parsed.diaChi || "",
-          lichSuBenh: parsed.lichSuBenh || "",
+          ID: parsed._id || "",
+          HoVaTen: parsed.hoTen || "",
+          NgaySinh: parsed.ngaySinh || "",
+          GioiTinh: parsed.gioiTinh || "",
+          SoBaoHiemYTe: parsed.soBHYT || "",
+          SoCCCD: parsed.soCCCD || "",
+          SoDienThoai: parsed.soDienThoai || "",
+          SDT_NguoiThan: parsed.sdtNguoiThan || "",
+          DiaChi: parsed.diaChi || "",
+          LichSuBenh: parsed.lichSuBenh || "",
         });
-
-
       } else {
         setPatient(null);
       }
@@ -54,33 +50,36 @@ export default function PatientInformationDetails() {
     }, [])
   );
 
+  // 🔹 Hàm cập nhật dữ liệu hoàn thiện
+  const handleUpdate = useCallback(async () => {
+    try {
+      if (!patient) return;
 
+      // Chuẩn hóa tất cả giá trị thành string
+      const payload: any = {};
+      Object.keys(patient).forEach(key => {
+        const value = patient[key];
+        payload[key] = value !== undefined && value !== null ? value.toString() : "";
+      });
 
-  // 🔹 Hàm cập nhật dữ liệu
-const handleUpdate = useCallback(async () => {
-  try {
-    const result = await UpdatePatientInformation(patient);
-    console.log("✅ API trả về:", result);
-    alert("Cập nhật thành công!");
-    
-    // nếu cần thì lưu lại vào AsyncStorage
-    await AsyncStorage.setItem("patientInfo", JSON.stringify(patient));
+      console.log("📤 Payload gửi lên API:", payload);
 
-  } catch (error: any) {
-    console.log("❌ Lỗi cập nhật:", error.message);
-    alert("Cập nhật thất bại: " + error.message);
-  }
-}, [patient]);
+      const result = await UpdatePatientInformation(payload);
+      console.log("✅ API trả về:", result);
+      alert("Cập nhật thành công!");
 
-
-
-
-  useEffect (() => {
-    console.log('chay dữ liệu --- ');
-    console.log(patient);
+      // Lưu payload đã chuẩn hóa vào AsyncStorage
+      await AsyncStorage.setItem("patientInfo", JSON.stringify(payload));
+      setPatient(payload); // cập nhật lại state với dữ liệu chuẩn hóa
+    } catch (error: any) {
+      console.log("❌ Lỗi cập nhật:", error.message);
+      alert("Cập nhật thất bại: " + error.message);
+    }
   }, [patient]);
 
-
+  useEffect(() => {
+    console.log("🔹 Dữ liệu hiện tại của patient:", patient);
+  }, [patient]);
 
   if (loading) {
     return (
@@ -103,79 +102,38 @@ const handleUpdate = useCallback(async () => {
       {/* 3 thông tin hiển thị */}
       <Card style={styles.card}>
         <Text style={styles.label}>Họ và tên</Text>
-        <Text style={styles.value}>{patient.hoTen}</Text>
+        <Text style={styles.value}>{patient.HoVaTen}</Text>
       </Card>
 
       <Card style={styles.card}>
         <Text style={styles.label}>Ngày sinh</Text>
-        <Text style={styles.value}>{patient.ngaySinh}</Text>
+        <Text style={styles.value}>{patient.NgaySinh}</Text>
       </Card>
 
       <Card style={styles.card}>
         <Text style={styles.label}>Giới tính</Text>
-        <Text style={styles.value}>{patient.gioiTinh}</Text>
+        <Text style={styles.value}>{patient.GioiTinh}</Text>
       </Card>
 
       {/* Các trường nhập */}
-      <Card style={styles.card}>
-        <Text style={styles.label}>Số BHYT</Text>
-        <TextInput
-          style={styles.input}
-          value={patient?.soBHYT || ""}  
-          placeholder="Nhập số BHYT"
-          onChangeText={(text) => setPatient({ ...patient, soBHYT: text })}
-        />
-      </Card>
-
-      <Card style={styles.card}>
-        <Text style={styles.label}>Số CCCD</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Nhập số CCCD"
-          value={patient?.soCCCD || ""}  
-          onChangeText={(text) => setPatient({ ...patient, soCCCD: text })}
-        />
-      </Card>
-
-      <Card style={styles.card}>
-        <Text style={styles.label}>Số điện thoại</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Nhập số điện thoại"
-          value={patient?.soDienThoai || ""}  
-          onChangeText={(text) => setPatient({ ...patient, soDienThoai: text })}
-        />
-      </Card>
-
-      <Card style={styles.card}>
-        <Text style={styles.label}>SĐT người thân</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Nhập SĐT người thân"
-          value={patient?.sdtNguoiThan || ""}  
-          onChangeText={(text) => setPatient({ ...patient, sdtNguoiThan: text })}
-        />
-      </Card>
-
-      <Card style={styles.card}>
-        <Text style={styles.label}>Địa chỉ</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Nhập địa chỉ"
-          value={patient?.diaChi || ""}  
-          onChangeText={(text) => setPatient({ ...patient, diaChi: text })}
-        />
-      </Card>
-
-      <Card style={styles.card}>
-        <Text style={styles.label}>Lịch sử bệnh</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Nhập lịch sử bệnh"
-          value={patient?.lichSuBenh || ""}  
-          onChangeText={(text) => setPatient({ ...patient, lichSuBenh: text })}
-        />
-      </Card>
+      {[
+        { label: "Số BHYT", key: "SoBaoHiemYTe", placeholder: "Nhập số BHYT" },
+        { label: "Số CCCD", key: "SoCCCD", placeholder: "Nhập số CCCD" },
+        { label: "Số điện thoại", key: "SoDienThoai", placeholder: "Nhập số điện thoại" },
+        { label: "SĐT người thân", key: "SDT_NguoiThan", placeholder: "Nhập SĐT người thân" },
+        { label: "Địa chỉ", key: "DiaChi", placeholder: "Nhập địa chỉ" },
+        { label: "Lịch sử bệnh", key: "LichSuBenh", placeholder: "Nhập lịch sử bệnh" },
+      ].map(field => (
+        <Card style={styles.card} key={field.key}>
+          <Text style={styles.label}>{field.label}</Text>
+          <TextInput
+            style={styles.input}
+            value={patient[field.key] || ""}
+            placeholder={field.placeholder}
+            onChangeText={text => setPatient({ ...patient, [field.key]: text })}
+          />
+        </Card>
+      ))}
 
       {/* 🔹 Nút cập nhật */}
       <TouchableOpacity style={styles.button} onPress={handleUpdate}>
@@ -211,7 +169,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "#007A86",
     alignItems: "center",
-    marginBottom : 120
+    marginBottom: 120,
   },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
