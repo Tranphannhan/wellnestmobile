@@ -98,48 +98,52 @@ export default function PatientInformationDetails() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      {/* 3 thông tin hiển thị */}
-      <Card style={styles.card}>
-        <Text style={styles.label}>Họ và tên</Text>
-        <Text style={styles.value}>{patient.HoVaTen}</Text>
-      </Card>
-
-      <Card style={styles.card}>
-        <Text style={styles.label}>Ngày sinh</Text>
-        <Text style={styles.value}>{patient.NgaySinh}</Text>
-      </Card>
-
-      <Card style={styles.card}>
-        <Text style={styles.label}>Giới tính</Text>
-        <Text style={styles.value}>{patient.GioiTinh}</Text>
-      </Card>
-
-      {/* Các trường nhập */}
-      {[
-        { label: "Số BHYT", key: "SoBaoHiemYTe", placeholder: "Nhập số BHYT" },
-        { label: "Số CCCD", key: "SoCCCD", placeholder: "Nhập số CCCD" },
-        { label: "Số điện thoại", key: "SoDienThoai", placeholder: "Nhập số điện thoại" },
-        { label: "SĐT người thân", key: "SDT_NguoiThan", placeholder: "Nhập SĐT người thân" },
-        { label: "Địa chỉ", key: "DiaChi", placeholder: "Nhập địa chỉ" },
-        { label: "Lịch sử bệnh", key: "LichSuBenh", placeholder: "Nhập lịch sử bệnh" },
-      ].map(field => (
-        <Card style={styles.card} key={field.key}>
-          <Text style={styles.label}>{field.label}</Text>
-          <TextInput
-            style={styles.input}
-            value={patient[field.key] || ""}
-            placeholder={field.placeholder}
-            onChangeText={text => setPatient({ ...patient, [field.key]: text })}
-          />
+    <View style={{ flex: 1 }}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }}>
+        {/* 3 thông tin hiển thị */}
+        <Card style={styles.card}>
+          <Text style={styles.label}>Họ và tên</Text>
+          <Text style={styles.value}>{patient.HoVaTen}</Text>
         </Card>
-      ))}
 
-      {/* 🔹 Nút cập nhật */}
-      <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-        <Text style={styles.buttonText}>Cập nhật thông tin</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <Card style={styles.card}>
+          <Text style={styles.label}>Ngày sinh</Text>
+          <Text style={styles.value}>{patient.NgaySinh}</Text>
+        </Card>
+
+        <Card style={styles.card}>
+          <Text style={styles.label}>Giới tính</Text>
+          <Text style={styles.value}>{patient.GioiTinh}</Text>
+        </Card>
+
+        {/* Các trường nhập */}
+        {[
+          { label: "Số BHYT", key: "SoBaoHiemYTe", placeholder: "Nhập số BHYT" },
+          { label: "Số CCCD", key: "SoCCCD", placeholder: "Nhập số CCCD" },
+          { label: "Số điện thoại", key: "SoDienThoai", placeholder: "Nhập số điện thoại" },
+          { label: "SĐT người thân", key: "SDT_NguoiThan", placeholder: "Nhập SĐT người thân" },
+          { label: "Địa chỉ", key: "DiaChi", placeholder: "Nhập địa chỉ" },
+          { label: "Lịch sử bệnh", key: "LichSuBenh", placeholder: "Nhập lịch sử bệnh" },
+        ].map(field => (
+          <Card style={styles.card} key={field.key}>
+            <Text style={styles.label}>{field.label}</Text>
+            <TextInput
+              style={styles.input}
+              value={patient[field.key] || ""}
+              placeholder={field.placeholder}
+              onChangeText={text => setPatient({ ...patient, [field.key]: text })}
+            />
+          </Card>
+        ))}
+      </ScrollView>
+
+      {/* 🔹 Nút cố định dưới màn hình */}
+      <View style={styles.fixedButton}>
+        <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+          <Text style={styles.buttonText}>Cập nhật thông tin</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
@@ -163,13 +167,26 @@ const styles = StyleSheet.create({
     marginTop: 6,
     backgroundColor: "#fafafa",
   },
+  fixedButton: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderColor: "#eee",
+    elevation: 10, // shadow Android
+    shadowColor: "#000", // shadow iOS
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: -3 },
+  },
   button: {
-    marginTop: 20,
     padding: 14,
     borderRadius: 10,
     backgroundColor: "#007A86",
     alignItems: "center",
-    marginBottom: 120,
   },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },

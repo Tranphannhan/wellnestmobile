@@ -2,7 +2,7 @@ import { patientInformationDetails } from "@/services/lookup";
 import { medicalExaminationBook } from "@/types/lookup.type";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -11,67 +11,91 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function DetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const [dataDetail, setDataDetail] = useState<medicalExaminationBook | null>(
-    null
-  );
+  const [dataDetail, setDataDetail] = useState<medicalExaminationBook | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    const loadAPI = async () => {
-      try {
-        setLoading(true);
-        const res = await patientInformationDetails(id as string);
-        setDataDetail(res[0]);
-      } catch (error) {
-        console.error("Lỗi load chi tiết:", error);
-      } finally {
-        setLoading(false);
+  // 🔹 Load nhanh từ AsyncStorage (nếu có)
+  const loadFromCache = async () => {
+    try {
+      const cached = await AsyncStorage.getItem("patientInfo");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed._id === id) {
+          setDataDetail({
+            _id: parsed._id,
+            HoVaTen: parsed.hoTen,
+            GioiTinh: parsed.gioiTinh,
+            NgaySinh: parsed.ngaySinh,
+            SoBaoHiemYTe: parsed.soBHYT,
+            SoCCCD: parsed.soCCCD,
+            SoDienThoai: parsed.soDienThoai,
+            SDT_NguoiThan: parsed.sdtNguoiThan,
+            DiaChi: parsed.diaChi,
+            LichSuBenh: parsed.lichSuBenh,
+          });
+        }
       }
-    };
+    } catch (e) {
+      console.error("❌ Lỗi đọc cache:", e);
+    }
+  };
 
-    loadAPI();
-  }, [id]);
+  // 🔹 Luôn refresh dữ liệu khi trang focus
+  useFocusEffect(
+    useCallback(() => {
+      const loadAPI = async () => {
+        try {
+          setLoading(true);
+          const res = await patientInformationDetails(id as string);
+          if (res && res[0]) {
+            setDataDetail(res[0]);
+          }
+        } catch (error) {
+          console.error("❌ Lỗi load chi tiết:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
+      // Load cache trước cho nhanh
+      loadFromCache();
+      // Rồi fetch API để chắc chắn dữ liệu mới nhất
+      loadAPI();
+    }, [id])
+  );
 
+  const Edit = async () => {
+    try {
+      if (!dataDetail) return;
 
-const Edit = async () => {
-  try {
-    if (!dataDetail) return;
+      // Chuẩn hóa dữ liệu để lưu lại
+      const fullInfo = {
+        _id: dataDetail._id || null,
+        hoTen: dataDetail.HoVaTen || "",
+        gioiTinh: dataDetail.GioiTinh || "Nam",
+        ngaySinh: dataDetail.NgaySinh || "",
+        soBHYT: dataDetail.SoBaoHiemYTe || "",
+        soCCCD: dataDetail.SoCCCD || "",
+        soDienThoai: dataDetail.SoDienThoai || "",
+        sdtNguoiThan: dataDetail.SDT_NguoiThan || "",
+        diaChi: dataDetail.DiaChi || "",
+        lichSuBenh: dataDetail.LichSuBenh || "",
+      };
 
+      await AsyncStorage.setItem("patientInfo", JSON.stringify(fullInfo));
 
-    // Thông tin đầy đủ
-    const fullInfo = {
-      _id : dataDetail._id || null,
-      hoTen: dataDetail.HoVaTen || "",
-      gioiTinh: dataDetail.GioiTinh || "Nam",
-      ngaySinh: dataDetail.NgaySinh || "",
-      soBHYT: dataDetail.SoBaoHiemYTe || "",
-      soCCCD: dataDetail.SoCCCD || "",
-      soDienThoai: dataDetail.SoDienThoai || "",
-      sdtNguoiThan: dataDetail.SDT_NguoiThan || "",
-      diaChi: dataDetail.DiaChi || "",
-      lichSuBenh: dataDetail.LichSuBenh || "",
-    };
+      router.push("/(tabs)/editPatientInformation");
+    } catch (e) {
+      console.error("❌ Lỗi lưu AsyncStorage:", e);
+    }
+  };
 
-    // 🔹 Xóa thông tin cũ trước
-    await AsyncStorage.removeItem("patientInfo");
-
-    // 🔹 Lưu lại thông tin mới
-    await AsyncStorage.setItem("patientInfo", JSON.stringify(fullInfo));
-
-    // Chuyển trang sau khi chắc chắn đã lưu
-    router.push("/(tabs)/editPatientInformation");
-  } catch (e) {
-    console.error("Lỗi lưu AsyncStorage:", e);
-  }
-};
-
- 
-  if (loading) {
+  if (loading && !dataDetail) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#007A86" />
@@ -87,13 +111,12 @@ const Edit = async () => {
     );
   }
 
-
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         {/* Họ tên */}
         <Text style={styles.name}>{dataDetail.HoVaTen}</Text>
-        <Text style={styles.role}>Bệnh nhân </Text>
+        <Text style={styles.role}>Bệnh nhân</Text>
 
         {/* Thông tin chi tiết */}
         <View style={styles.infoCard}>
@@ -117,7 +140,7 @@ const Edit = async () => {
           <Text style={styles.actionText}>Sửa thông tin</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        <TouchableOpacity  
           style={[styles.actionButton, styles.acceptButton]}
           onPress={async () => {
             try {
@@ -129,7 +152,7 @@ const Edit = async () => {
                 router.push("/enterInformation");
               }
             } catch (e) {
-              console.error("Lỗi lưu thông tin bệnh nhân:", e);
+              console.error("❌ Lỗi lưu thông tin bệnh nhân:", e);
             }
           }}
         >
@@ -175,12 +198,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 12,
     position: "absolute",
-    bottom: -5,
+    bottom: 0,
     left: 0,
     right: 0,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    paddingBottom: 15,
     backgroundColor: "white",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
@@ -196,13 +218,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  editButton: {
-    backgroundColor: "#d5ae00ff",
-  },
-
-  acceptButton: {
-    backgroundColor: "#007A86",
-  },
+  editButton: { backgroundColor: "#d5ae00ff" },
+  acceptButton: { backgroundColor: "#007A86" },
 
   actionText: { color: "#fff", fontWeight: "600", fontSize: 14 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },

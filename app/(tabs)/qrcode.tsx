@@ -1,7 +1,8 @@
 import { SearchScanQrCode } from "@/services/lookup";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Animated,
   StyleSheet,
@@ -15,6 +16,18 @@ export default function QrScanner() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [qrData, setQrData] = useState("");
+
+
+  useFocusEffect(
+  useCallback(() => {
+    const clearStorage = async () => {
+      await AsyncStorage.removeItem("PatientInformation");
+      console.log("✅ Đã xóa PatientInformation khi vào lại QrScanner");
+    };
+    
+    clearStorage();
+  }, [])
+);
 
   // Animation cho tia laser
   const animatedValue = useState(new Animated.Value(0))[0];
@@ -50,27 +63,59 @@ export default function QrScanner() {
     );
   }
 
+
+
+
   const handleBarCodeScanned = async (event: { data: string; type: string }) => {
     setScanned(true);
     setQrData(event.data);
     const cccd = event.data.split("||")[0];
     const result = await SearchScanQrCode(cccd);
 
+
+    // Chưa có thông tin bệnh nhân
+    if (result.data.length === 0){
+      const parts = event.data.split("||"); 
+      const cccd = parts[0]; 
+      const info = parts[1].split("|"); 
+
+      const data = {
+        cccd: cccd,
+        hoTen: info[0],
+        ngaySinh: info[1],
+        gioiTinh: info[2],
+        diaChi: info[3],
+      };
+
+      try {
+        await AsyncStorage.setItem("PatientInformation", JSON.stringify(data));
+        console.log('lưu -- ');
+        console.log(data);
+
+        console.log('');
+        console.log('');
+        console.log('');
+        router.push("/createmanually");
+
+
+      } catch (error) {
+        console.error("❌ Lỗi khi lưu:", error);
+      }
+
+    }
+ 
+
+    // Nếu có thông tin 
     if (result.data[0]._id) {
       router.push({
         pathname: "/PatientDetails",
         params: { id: result.data[0]._id },
       });
-    } else {
-
-      alert ("Trường hơp chưa có thông tin");
-      // ---- 
-
-
-    }
-
+    } 
 
   };
+
+
 
   return (
     <View style={styles.container}>

@@ -37,6 +37,7 @@ export default function EnterInformation() {
 
     LoadingAPI();
   }, []);
+  
 
   const handleNext = () => {
     let newErrors: { department?: string; reason?: string } = {};
@@ -80,7 +81,8 @@ export default function EnterInformation() {
           placeholder="Nhập chiều cao"
           placeholderTextColor="#8d8d8dff"
         />
-
+ 
+  
         {/* Cân nặng */}
         <Text style={styles.label}>Cân nặng (kg)</Text>
         <TextInput

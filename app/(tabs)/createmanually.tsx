@@ -1,7 +1,9 @@
 // app/(tabs)/createmanually.tsx
 import { createMedicalExaminationCard } from '@/services/medicalRecord';
 import { medicalCardDataType } from '@/types/medicalRecord.type';
-import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -12,32 +14,66 @@ import {
   View
 } from 'react-native';
 
-export default function CreateManuallyScreen() {
-  const [form, setForm] = useState({
-    hoTen: '',
-    cccd: '',
-    ngaySinh: '',
-    bhyt: '',
-    dienThoai: '',
-    dienThoaiNguoiThan: '',
-    diaChi: '',
-    gioiTinh: '',
-    lichSuBenh: '',
-  });
+interface PatientInformationType {
+  hoTen?: string;
+  cccd?: string;
+  ngaySinh?: string;
+  bhyt?: string;
+  dienThoai?: string;
+  dienThoaiNguoiThan?: string;
+  diaChi?: string;
+  gioiTinh?: string;
+  lichSuBenh?: string;
+}
 
+export default function CreateManuallyScreen() {
+  const [form, setForm] = useState<PatientInformationType>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
 
+
+
+
+  // 🔹 Load AsyncStorage khi vào lại màn hình
+  useFocusEffect(
+    useCallback(() => {
+      const loadData = async () => {
+        try {
+          const saved = await AsyncStorage.getItem("PatientInformation");
+          console.log("📌 Đọc dữ liệu mới:", saved);
+
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            setForm((prev) => ({
+              ...prev,
+              hoTen: parsed.hoTen || "",
+              cccd: parsed.cccd || "",
+              ngaySinh: parsed.ngaySinh || "",
+              gioiTinh: parsed.gioiTinh || "",
+              diaChi: parsed.diaChi || "",
+            }));
+          }
+        } catch (error) {
+          console.error("❌ Lỗi khi load dữ liệu:", error);
+        }
+      };
+
+      loadData();
+    }, [])
+  );
+
+
+
   const handleChange = (field: string, value: string) => {
     setForm({ ...form, [field]: value });
-    setErrors({ ...errors, [field]: '' }); // clear lỗi khi user gõ lại
+    setErrors({ ...errors, [field]: '' }); // clear lỗi khi user nhập lại
   };
 
   const validateForm = () => {
     let newErrors: { [key: string]: string } = {};
-    if (!form.hoTen.trim()) newErrors.hoTen = 'Vui lòng nhập họ và tên';
-    if (!form.ngaySinh.trim()) newErrors.ngaySinh = 'Vui lòng nhập ngày sinh';
-    if (!form.gioiTinh.trim()) newErrors.gioiTinh = 'Vui lòng chọn giới tính';
+    if (!form.hoTen?.trim()) newErrors.hoTen = 'Vui lòng nhập họ và tên';
+    if (!form.ngaySinh?.trim()) newErrors.ngaySinh = 'Vui lòng nhập ngày sinh';
+    if (!form.gioiTinh?.trim()) newErrors.gioiTinh = 'Vui lòng chọn giới tính';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -47,12 +83,12 @@ export default function CreateManuallyScreen() {
     if (!validateForm()) return;
 
     const data: medicalCardDataType = {
-      name: form.hoTen,
-      sex: form.gioiTinh,
-      dateOfBirth: form.ngaySinh,
-      phone: form.dienThoai,
-      CCCDNumber: form.cccd,
-      address: form.diaChi,
+      name: form.hoTen || '',
+      sex: form.gioiTinh || '',
+      dateOfBirth: form.ngaySinh || '',
+      phone: form.dienThoai || '',
+      CCCDNumber: form.cccd || '',
+      address: form.diaChi || '',
       BHYT: form.bhyt || '',
       relativePhone: form.dienThoaiNguoiThan || '',
       medicalHistory: form.lichSuBenh || '',
@@ -88,6 +124,7 @@ export default function CreateManuallyScreen() {
     }
   };
 
+  // 👇 giữ nguyên giao diện UI bạn gửi
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Họ tên */}
@@ -272,7 +309,7 @@ const styles = StyleSheet.create({
   submitBtn: {
     marginTop: 32,
     padding: 12,
-    marginBottom:30,
+    marginBottom: 30,
     borderRadius: 8,
     backgroundColor: '#007A86',
     alignItems: 'center',
