@@ -39,3 +39,33 @@ export async function patientInformationDetails (id : string) {
     }
 }
 
+
+// Tìm kiếm bệnh nhân quét mã QR nếu từng đến khám
+export async function SearchScanQrCode (cccd : string) {
+    const response = await fetch(
+      `${'https://bewellnest.onrender.com'}/The_Kham_Benh/TimKiemSoKhamBenh/Pagination?soCCCD=${cccd}`
+    );
+
+    if (!response.ok) {
+      console.error("Lỗi khi gọi API:", response.status);
+      alert("Không thể truy cập dữ liệu. Vui lòng thử lại.");
+      return;
+    }
+
+    const examination = await response.json();
+    return examination;
+}
+
+
+// cập nhât thông tin bệnh nhân 
+export async function UpdatePatientInformation(formData: any) {
+    const response = await fetch(`https://bewellnest.onrender.com/The_Kham_Benh/Edit/${formData.ID}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Lỗi cập nhật thông tin");
+    return data; // ✅ phải trả về
+}

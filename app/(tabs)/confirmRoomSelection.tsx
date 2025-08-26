@@ -11,24 +11,59 @@ import {
   Text,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
+
+interface createExaminationCardInformationType {
+  Id_TheKhamBenh?: string;
+  Id_Bacsi?: string;
+  Id_NguoiTiepNhan?: string;
+  Id_GiaDichVu?: string;
+  LyDoDenKham?: string;
+}
 
 export default function ChooseRoomMobile() {
   const [rooms, setRooms] = useState<receptionTemporaryDoctorTypes[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const { idKhoa, reason} = useLocalSearchParams();
+  const { idKhoa, reason } = useLocalSearchParams();
   const router = useRouter();
 
   const MAX_PATIENTS = 10;
   const MINUTES_PER_PATIENT = 15;
 
-  async function handleNext(room:string) {
+  async function handleNext(Doctor: string) {
     const dataLocal = await AsyncStorage.getItem("patientDetail");
-    const jsonDataLocal: medicalExaminationBook = dataLocal ? JSON.parse(dataLocal) : null;
+    const jsonDataLocal: medicalExaminationBook = dataLocal
+      ? JSON.parse(dataLocal)
+      : null;
+    const examinationCardInformation: createExaminationCardInformationType = {
+      Id_Bacsi: Doctor,
+      LyDoDenKham: reason as string,
+      Id_TheKhamBenh: jsonDataLocal._id,
+      Id_GiaDichVu: "683420eb8b7660453369dce1",
+      Id_NguoiTiepNhan: "68272e93b4cfad70da810029",
+    };
+    // Gửi yêu cầu tạo phiếu khám bệnh
+    const response = await fetch(
+      `https://bewellnest.onrender.com/Phieu_Kham_Benh/Add`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(examinationCardInformation),
+      }
+    );
 
-    alert(room);
-    alert(reason);
-    alert(JSON.stringify(jsonDataLocal._id));
-
+    if (!response.ok) {
+      alert("lỗi khi thêm thông tin");
+      return;
+    } else {
+      Toast.show({
+        type: "success",
+        text1: "Thành công 🎉",
+        text2: "Tạo phiếu khám bệnh thành công!",
+      });
+    }
   }
 
   useEffect(() => {
@@ -142,7 +177,9 @@ export default function ChooseRoomMobile() {
           >
             <Text
               style={styles.buttonText}
-              onPress={()=>{handleNext(item._id)}}
+              onPress={() => {
+                handleNext(item._id);
+              }}
               // router.push("/paymentConfirmation")
             >
               {isFull ? "Đã đầy" : index === 0 ? "Ưu tiên" : "Chọn phòng"}

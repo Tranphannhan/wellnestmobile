@@ -131,7 +131,7 @@ export default function Home({ navigation }: any) {
             mode="parallax" // hoặc thử "horizontal-stack"
             modeConfig={{
               parallaxScrollingScale: 0.80, // scale ảnh hai bên nhỏ lại
-              parallaxScrollingOffset: 107, // khoảng cách lệch
+              parallaxScrollingOffset: 95, // khoảng cách lệch
             }}
             renderItem={({ item }) => (
               <Image
