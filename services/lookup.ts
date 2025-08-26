@@ -56,7 +56,6 @@ export async function SearchScanQrCode (cccd : string) {
     return examination;
 }
 
-
 // cập nhât thông tin bệnh nhân 
 export async function UpdatePatientInformation(formData: any) {
     const response = await fetch(`https://bewellnest.onrender.com/The_Kham_Benh/Edit/${formData.ID}`, {
