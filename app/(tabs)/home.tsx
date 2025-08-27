@@ -1,13 +1,37 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
-import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from "jwt-decode";
 import Carousel from "react-native-reanimated-carousel";
 
-const { height, width } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
-export default function Home({ navigation }: any) {
-  const router = useRouter()
+interface DecodedToken {
+  _id: string;
+  _TenTaiKhoan: string;
+  _SoDienThoai: string;
+  _SoCCCD: string;
+  _Image: string;
+  _Id_LoaiTaiKhoan: {
+    VaiTro: string;
+  };
+  iat: number;
+  exp: number;
+}
+
+export default function Home() {
+  const router = useRouter();
+  const [user, setUser] = useState<DecodedToken | null>(null);
+
   const bannerData = [
     { id: 1, image: require("@/assets/images/banner1.webp") },
     { id: 2, image: require("@/assets/images/banner2.webp") },
@@ -15,39 +39,54 @@ export default function Home({ navigation }: any) {
   ];
 
   const features = [
-  {
-    id: 1,
-    icon: "qr-code-outline",
-    title: "Quét QR",
-    desc: "Tiếp nhận nhanh thông tin bệnh nhân",
-    route: "/qrcode",
-  },
-  {
-    id: 2,
-    icon: "medkit-outline",
-    title: "Khám bệnh",
-    desc: "Tạo phiếu khám, chọn phòng & loại hình",
-    route: "/examination",
-  },
-  {
-    id: 3,
-    icon: "cash-outline",
-    title: "Thanh toán",
-    desc: "Xác nhận & quản lý chi phí khám chữa",
-    route: "/payment",
-  },
-  {
-    id: 4,
-    icon: "document-text-outline",
-    title: "Phiếu khám",
-    desc: "Quản lý kết quả khám & lịch sử điều trị",
-    route: "/records",
-  },
+    {
+      id: 1,
+      icon: "qr-code-outline",
+      title: "Quét QR",
+      desc: "Tiếp nhận nhanh thông tin bệnh nhân",
+      route: "/qrcode",
+    },
+    {
+      id: 2,
+      icon: "medkit-outline",
+      title: "Khám bệnh",
+      desc: "Tạo phiếu khám, chọn phòng & loại hình",
+      route: "/examination",
+    },
+    {
+      id: 3,
+      icon: "cash-outline",
+      title: "Thanh toán",
+      desc: "Xác nhận & quản lý chi phí khám chữa",
+      route: "/payment",
+    },
+    {
+      id: 4,
+      icon: "document-text-outline",
+      title: "Phiếu khám",
+      desc: "Quản lý kết quả khám & lịch sử điều trị",
+      route: "/records",
+    },
   ];
+
+  // 🔹 Lấy user từ token
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        if (token) {
+          const decoded: DecodedToken = jwtDecode(token);
+          setUser(decoded);
+        }
+      } catch (err) {
+        console.error("Decode token lỗi:", err);
+      }
+    })();
+  }, []);
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* Phần trên 35% */}
+      {/* Header */}
       <View
         style={{
           height: 300,
@@ -58,7 +97,7 @@ export default function Home({ navigation }: any) {
           paddingTop: 50,
         }}
       >
-        {/* Header */}
+        {/* Thông tin user */}
         <View
           style={{
             flexDirection: "row",
@@ -70,20 +109,26 @@ export default function Home({ navigation }: any) {
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Image
               source={{
-                uri: "https://anhnail.com/wp-content/uploads/2024/09/Hinh-gai-xinh-mac-vay-trang-ngan-che-mat.jpg",
+                uri:`https://bewellnest.onrender.com/image/${user?._Image}`,
               }}
               style={{
                 width: 50,
                 height: 50,
                 borderRadius: 25,
                 marginRight: 12,
+                backgroundColor: "#ccc",
               }}
             />
 
             <View>
-              <Text style={{ color: "#fff", fontSize: 14 }}>Vai trò</Text>
-              <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-                Tiếp nhận
+              <Text style={{ color: "#fff", fontSize: 14 }}>
+                {"Tiếp nhận"}
+              </Text>
+              <Text
+                style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}
+                numberOfLines={1}
+              >
+                {user?._TenTaiKhoan || "Người dùng"}
               </Text>
             </View>
           </View>
@@ -122,16 +167,16 @@ export default function Home({ navigation }: any) {
         >
           <Carousel
             loop
-            width={width} // 80% màn hình để hai bên hở ra
+            width={width}
             height={180}
             autoPlay
             autoPlayInterval={3000}
             data={bannerData}
             scrollAnimationDuration={1000}
-            mode="parallax" // hoặc thử "horizontal-stack"
+            mode="parallax"
             modeConfig={{
-              parallaxScrollingScale: 0.80, // scale ảnh hai bên nhỏ lại
-              parallaxScrollingOffset: 95, // khoảng cách lệch
+              parallaxScrollingScale: 0.8,
+              parallaxScrollingOffset: 95,
             }}
             renderItem={({ item }) => (
               <Image
@@ -148,7 +193,7 @@ export default function Home({ navigation }: any) {
         </View>
       </View>
 
-      {/* Phần dưới: giới thiệu chức năng */}
+      {/* Danh sách chức năng */}
       <View
         style={{
           flex: 1,
@@ -170,8 +215,9 @@ export default function Home({ navigation }: any) {
           </Text>
 
           {features.map((f) => (
-            <View
+            <TouchableOpacity
               key={f.id}
+              onPress={() => router.push('/(tabs)/home')}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -196,13 +242,13 @@ export default function Home({ navigation }: any) {
                 </Text>
                 <Text style={{ fontSize: 13, color: "#555" }}>{f.desc}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
 
         {/* Nút bắt đầu */}
         <TouchableOpacity
-          onPress={() => {router.push('/qrcode')}} 
+          onPress={() => router.push("/qrcode")}
           style={{
             backgroundColor: "#007A86",
             paddingVertical: 14,

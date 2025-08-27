@@ -89,12 +89,6 @@ export default function QrScanner() {
 
       try {
         await AsyncStorage.setItem("PatientInformation", JSON.stringify(data));
-        console.log('lưu -- ');
-        console.log(data);
-
-        console.log('');
-        console.log('');
-        console.log('');
         router.push("/createmanually");
 
 

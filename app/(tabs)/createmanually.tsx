@@ -40,7 +40,6 @@ export default function CreateManuallyScreen() {
       const loadData = async () => {
         try {
           const saved = await AsyncStorage.getItem("PatientInformation");
-          console.log("📌 Đọc dữ liệu mới:", saved);
 
           if (saved) {
             const parsed = JSON.parse(saved);

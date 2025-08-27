@@ -19,7 +19,8 @@ export default function EnterInformation() {
   >([]);
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [department, setDepartment] = useState("");
+  const [department, setDepartment] = useState(""); // id khoa
+  const [departmentName, setDepartmentName] = useState<string>(""); // tên khoa
   const [reason, setReason] = useState("");
 
   // Trạng thái lỗi
@@ -37,7 +38,6 @@ export default function EnterInformation() {
 
     LoadingAPI();
   }, []);
-  
 
   const handleNext = () => {
     let newErrors: { department?: string; reason?: string } = {};
@@ -60,6 +60,7 @@ export default function EnterInformation() {
           height,
           weight,
           reason,
+          departmentName: departmentName,
         },
       });
     }
@@ -81,8 +82,7 @@ export default function EnterInformation() {
           placeholder="Nhập chiều cao"
           placeholderTextColor="#8d8d8dff"
         />
- 
-  
+
         {/* Cân nặng */}
         <Text style={styles.label}>Cân nặng (kg)</Text>
         <TextInput
@@ -104,7 +104,15 @@ export default function EnterInformation() {
         >
           <Picker
             selectedValue={department}
-            onValueChange={(itemValue) => setDepartment(itemValue)}
+            onValueChange={(itemValue) => {
+              setDepartment(itemValue);
+
+              // tìm tên khoa tương ứng
+              const selectedDept = dataDepartment.find(
+                (d) => d._id === itemValue
+              );
+              setDepartmentName(selectedDept ? selectedDept.TenKhoa as string : "");
+            }}
           >
             <Picker.Item label="--- Chọn khoa ---" value="" />
             {dataDepartment.map((item) => (
@@ -197,7 +205,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    paddingTop:10,
+    paddingTop: 10,
     paddingBottom: 10,
     backgroundColor: "#fff",
     borderTopWidth: 1,

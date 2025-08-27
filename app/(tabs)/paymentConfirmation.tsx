@@ -1,5 +1,7 @@
-import { useRouter } from "expo-router";
-import React from "react";
+import { medicalExaminationBook } from "@/types/lookup.type";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useState, useCallback } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -8,22 +10,40 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function PaymentConfirmation() {
-  const router = useRouter()
-  const patient = {
-    name: "Nguyễn Thị Hồng Nhung",
-    cccd: "038123456789",
-    dob: "1992-03-10",
-    phone: "0978123456",
-    gender: "Nữ",
-    height: "Không có",
-    weight: "Không có",
-    clinic: "108",
-    department: "Chấn thương chỉnh hình",
-    address: "Số 12, đường Lê Duẩn, TP. Vinh, Nghệ An",
-    reason: "gbb",
-  };
+  const [data, setData] = useState<medicalExaminationBook | null>(null);
+  const { reason, height, weight, departmentName, roomNumber, idPhieuKham } =
+    useLocalSearchParams();
+  const router = useRouter();
+
+  // load lại dữ liệu mỗi khi màn hình được focus
+  useFocusEffect(
+    useCallback(() => {
+      const loadData = async () => {
+        try {
+          const dataLocal = await AsyncStorage.getItem("patientDetail");
+          if (dataLocal) {
+            const parsed: medicalExaminationBook = JSON.parse(dataLocal);
+            console.log("📌 Patient detail local:", parsed);
+            setData(parsed);
+          } else {
+            setData(null);
+          }
+        } catch (error) {
+          console.error("❌ Lỗi đọc AsyncStorage:", error);
+        }
+      };
+
+      loadData();
+
+      // cleanup nếu cần reset khi rời trang
+      return () => {
+        setData(null);
+      };
+    }, [])
+  );
 
   const InputField = ({ label, value }: { label: string; value: string }) => (
     <View style={styles.field}>
@@ -37,31 +57,35 @@ export default function PaymentConfirmation() {
       {/* Nội dung scroll */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.grid}>
-          <InputField label="Họ và tên" value={patient.name} />
-          <InputField label="Số CCCD" value={patient.cccd} />
+          <InputField label="Họ và tên" value={data?.HoVaTen || "Chưa rõ"} />
+          <InputField label="Số CCCD" value={data?.SoCCCD || "Chưa rõ"} />
         </View>
 
         <View style={styles.grid}>
-          <InputField label="Ngày sinh" value={patient.dob} />
-          <InputField label="Số điện thoại" value={patient.phone} />
+          <InputField label="Ngày sinh" value={data?.NgaySinh || "Chưa rõ"} />
+          <InputField
+            label="Số điện thoại"
+            value={data?.SoDienThoai || "Chưa rõ"}
+          />
         </View>
 
         <View style={styles.grid}>
-          <InputField label="Giới tính" value={patient.gender} />
-          <InputField label="Chiều cao" value={patient.height + " cm"} />
+          <InputField label="Giới tính" value={data?.GioiTinh || "Chưa rõ"} />
+          <InputField label="Chiều cao" value={`${height || "?"} cm`} />
         </View>
 
         <View style={styles.grid}>
-          <InputField label="Cân nặng" value={patient.weight + " kg"} />
-          <InputField label="Phòng khám" value={patient.clinic} />
+          <InputField label="Cân nặng" value={`${weight || "?"} kg`} />
+          <InputField label="Phòng khám" value={(roomNumber as string) || ""} />
         </View>
 
-        <InputField label="Khoa" value={patient.department} />
-        <InputField label="Địa chỉ" value={patient.address} />
+        <InputField label="Khoa" value={(departmentName as string) || ""} />
+        <InputField label="Địa chỉ" value={data?.DiaChi || "Chưa rõ"} />
+
         <View style={styles.field}>
           <Text style={styles.label}>Lí do đến khám</Text>
           <TextInput
-            value={patient.reason}
+            value={(reason as string) || ""}
             editable={false}
             multiline
             numberOfLines={3}
@@ -72,11 +96,24 @@ export default function PaymentConfirmation() {
 
       {/* Nút cố định dưới cùng */}
       <View style={styles.actions}>
-        <TouchableOpacity onPress={()=>{router.push('/home')}}  style={[styles.btn, styles.btnCancel]}>
+        <TouchableOpacity
+          onPress={() => {
+            router.push("/home");
+          }}
+          style={[styles.btn, styles.btnCancel]}
+        >
           <Text style={styles.btnText}>Không thanh toán</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={()=>{}} style={[styles.btn, styles.btnConfirm]}>
+        <TouchableOpacity
+          onPress={() => {
+            router.push({
+              pathname: "/pay",
+              params: { name: data?.HoVaTen || "", idPhieuKham },
+            });
+          }}
+          style={[styles.btn, styles.btnConfirm]}
+        >
           <Text style={styles.btnText}>Xác nhận đã thanh toán</Text>
         </TouchableOpacity>
       </View>
@@ -85,37 +122,12 @@ export default function PaymentConfirmation() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1, // chiếm toàn màn hình
-    backgroundColor: "#fff",
-  },
-
-  textarea: {
-    minHeight: 90,
-    textAlignVertical: "top", // để text bắt đầu từ trên
-  },
-
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 100, // chừa chỗ cho button cố định
-  },
-
-  grid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 10,
-  },
-  field: {
-    flex: 1,
-    marginBottom: 15,
-  },
-
-  label: {
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 5,
-  },
-
+  container: { flex: 1, backgroundColor: "#fff" },
+  textarea: { minHeight: 90, textAlignVertical: "top" },
+  scrollContent: { padding: 20, paddingBottom: 100 },
+  grid: { flexDirection: "row", justifyContent: "space-between", gap: 10 },
+  field: { flex: 1, marginBottom: 15 },
+  label: { fontSize: 14, color: "#555", marginBottom: 5 },
   input: {
     backgroundColor: "#f5f5f5",
     borderWidth: 1,
@@ -125,38 +137,22 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     color: "#444",
   },
-
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 16,
+    padding: 10,
     borderTopWidth: 1,
+    paddingHorizontal: 12,
     borderColor: "#eee",
     backgroundColor: "#fff",
-    paddingBottom: 30,
+    paddingBottom: 10,
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
   },
-
-  btn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginHorizontal: 5,
-  },
-  btnCancel: {
-    backgroundColor: "#e74c3c",
-  },
-
-  btnConfirm: {
-    backgroundColor: "#3498db",
-  },
-
-  btnText: {
-    color: "#fff",
-    fontWeight: "600",
-    textAlign: "center",
-  },
+  btn: { flex: 1, paddingVertical: 12, borderRadius: 8, marginHorizontal: 5 },
+  btnCancel: { backgroundColor: "#e74c3c" },
+  btnConfirm: { backgroundColor: "#3498db" },
+  btnText: { color: "#fff", fontWeight: "600", textAlign: "center" },
 });

@@ -1,75 +1,85 @@
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
-import  Toast, { BaseToast, ErrorToast }  from "react-native-toast-message";
+import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const router = useRouter();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  const [isChecking, setIsChecking] = useState(false);
+  const [initialRoute, setInitialRoute] = useState<string | null>(null);
+
   useEffect(() => {
     const checkLogin = async () => {
-      if (isChecking) {
-        router.replace('./home');
-      } else {
-        router.replace('/login');
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        if (token) {
+          setInitialRoute("(tabs)"); // hoặc "home"
+        } else {
+          setInitialRoute("login");
+        }
+      } catch (err) {
+        console.error("Lỗi kiểm tra login:", err);
+        setInitialRoute("login");
       }
     };
 
     checkLogin();
+  }, []);
 
-  }, [isChecking , router]);
-
-  
   const toastConfig = {
-  success: (props: any) => (
-    <BaseToast
-      {...props}
-      style={{ 
-        borderLeftColor: "#009f9fff", // màu viền trái
-        backgroundColor: "#009f9fff", // đổi nền
-      }}
-      contentContainerStyle={{ paddingHorizontal: 15 }}
-      text1Style={{
-        fontSize: 15,
-        fontWeight: "bold",
-        color: "#fff", // đổi màu chữ để nổi bật
-      }}
-      text2Style={{
-        fontSize: 13,
-        color: "#fff",
-      }}
-    />
-  ),
-  error: (props: any) => (
-    <ErrorToast
-      {...props}
-      style={{ borderLeftColor: "red", backgroundColor: "red" }}
-      text1Style={{ color: "#fff" }}
-      text2Style={{ color: "#fff" }}
-    />
-  ),
-};
+    success: (props: any) => (
+      <BaseToast
+        {...props}
+        style={{
+          borderLeftColor: "#009f9fff",
+          backgroundColor: "#009f9fff",
+        }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{
+          fontSize: 15,
+          fontWeight: "bold",
+          color: "#fff",
+        }}
+        text2Style={{
+          fontSize: 13,
+          color: "#fff",
+        }}
+      />
+    ),
+    error: (props: any) => (
+      <ErrorToast
+        {...props}
+        style={{ borderLeftColor: "red", backgroundColor: "red" }}
+        text1Style={{ color: "#fff" }}
+        text2Style={{ color: "#fff" }}
+      />
+    ),
+  };
 
+  if (!initialRoute) {
+    // show splash/loading screen
+    return null;
+  }
 
   return (
     <ThemeProvider value={DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="login" />
         <Stack.Screen name="index" />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
-      <Toast config={toastConfig}/>
+      <Toast config={toastConfig} />
     </ThemeProvider>
   );
 }

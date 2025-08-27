@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -8,31 +8,65 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from "jwt-decode";
+import { useRouter } from "expo-router"; // 👈 thêm
+
+interface DecodedToken {
+  _id: string;
+  _TenTaiKhoan: string;
+  _SoDienThoai: string;
+  _SoCCCD: string;
+  _Image: string;
+  _NamSinh?: string;
+  _GioiTinh?: string;
+  _Id_LoaiTaiKhoan: {
+    VaiTro: string;
+    TenLoaiTaiKhoan?: string;
+  };
+  iat: number;
+  exp: number;
+}
 
 export default function Account() {
-  // 👉 Giả lập dữ liệu user theo đúng field
-  const user = {
-    _id: "12345",
-    _TenTaiKhoan: "Nguyễn Đình Huân",
-    _SoDienThoai: "0369594026",
-    _SoCCCD: "092018304122",
-    _Image:
-      "https://anhnail.com/wp-content/uploads/2024/09/Hinh-gai-xinh-mac-vay-trang-ngan-che-mat.jpg",
-    _NamSinh: "2000",
-    _GioiTinh: "Nam",
-    _Id_LoaiTaiKhoan: {
-      VaiTro: "Admin",
-    },
-  };
+  const [user, setUser] = useState<DecodedToken | null>(null);
+  const router = useRouter(); // 👈 hook điều hướng
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        if (token) {
+          const decoded: DecodedToken = jwtDecode(token);
+          setUser(decoded);
+        }
+      } catch (err) {
+        console.error("Decode token lỗi:", err);
+      }
+    })();
+  }, []);
 
   const handleEditInfo = () => {
-    alert('ok')
+    alert("Chức năng sửa thông tin");
   };
 
-  const handleLogout = () => {
-    console.log("Đăng xuất");
-  };
+  async function signOut() {
+    try {
+      await AsyncStorage.removeItem("authToken");
+      setUser(null);
+      router.replace("/login"); // 👈 điều hướng về login
+    } catch (err) {
+      console.error("Không thể xóa token:", err);
+    }
+  }
+
+  if (!user) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Đang tải thông tin...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -44,26 +78,31 @@ export default function Account() {
           </TouchableOpacity>
         </View>
 
-        <Image source={{ uri: user._Image }} style={styles.avatar} />
+        <Image
+          source={{
+            uri: `https://bewellnest.onrender.com/image/${user._Image}`,
+          }}
+          style={styles.avatar}
+        />
         <Text style={styles.name}>{user._TenTaiKhoan}</Text>
-        <Text style={styles.role}>{user._Id_LoaiTaiKhoan.VaiTro}</Text>
+        <Text style={styles.role}>{user._Id_LoaiTaiKhoan?.VaiTro}</Text>
       </View>
 
       {/* Thông tin cá nhân */}
       <View style={styles.infoBox}>
-        <InfoRow
-          icon="call-outline"
-          label="Số điện thoại"
-          value={user._SoDienThoai}
-        />
+        <InfoRow icon="call-outline" label="Số điện thoại" value={user._SoDienThoai} />
         <InfoRow icon="card-outline" label="CCCD" value={user._SoCCCD} />
-        <InfoRow icon="calendar-outline" label="Năm sinh" value={user._NamSinh} />
-        <InfoRow icon="male-outline" label="Giới tính" value={user._GioiTinh} />
+        {user._NamSinh && (
+          <InfoRow icon="calendar-outline" label="Năm sinh" value={user._NamSinh} />
+        )}
+        {user._GioiTinh && (
+          <InfoRow icon="male-outline" label="Giới tính" value={user._GioiTinh} />
+        )}
       </View>
 
       {/* Nút chức năng */}
       <View style={styles.actionBox}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
           <Ionicons name="log-out-outline" size={20} color="#fff" />
           <Text style={styles.logoutButtonText}>Đăng xuất</Text>
         </TouchableOpacity>
@@ -91,10 +130,7 @@ const InfoRow = ({
 );
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F4F6FA",
-  },
+  container: { flex: 1, backgroundColor: "#F4F6FA" },
   header: {
     backgroundColor: "#007A86",
     paddingVertical: 20,
@@ -121,15 +157,8 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
     marginBottom: 10,
   },
-  name: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  role: {
-    fontSize: 14,
-    color: "#e0e0e0",
-  },
+  name: { fontSize: 20, fontWeight: "bold", color: "#fff" },
+  role: { fontSize: 14, color: "#e0e0e0" },
   infoBox: {
     backgroundColor: "#fff",
     marginHorizontal: 16,
@@ -148,19 +177,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
-  label: {
-    fontWeight: "600",
-    color: "#444",
-  },
-  value: {
-    color: "#333",
-    fontSize: 14,
-  },
-  actionBox: {
-    marginTop: 30,
-    marginHorizontal: 16,
-    gap: 12,
-  },
+  label: { fontWeight: "600", color: "#444" },
+  value: { color: "#333", fontSize: 14 },
+  actionBox: { marginTop: 30, marginHorizontal: 16, gap: 12 },
   logoutButton: {
     backgroundColor: "#4d4d4dff",
     flexDirection: "row",
@@ -170,8 +189,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     gap: 8,
   },
-  logoutButtonText: {
-    color: "#fff",
-    fontSize: 16,
-  },
+  logoutButtonText: { color: "#fff", fontSize: 16 },
 });

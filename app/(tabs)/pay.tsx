@@ -1,74 +1,103 @@
+import { handlePay } from "@/services/pay";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Toast from "react-native-toast-message";
 
 export default function Pay() {
   const [selectedMethod, setSelectedMethod] = useState<"cash" | "momo">("cash");
+  const { name, idPhieuKham } = useLocalSearchParams();
+  const router = useRouter();
+
+  async function Pay() {
+    const result = await handlePay(idPhieuKham as string);
+    if (result?.status === true && result?.QueueNumber) {
+      Toast.show({
+        type: "success",
+        text1: "Thành công 🎉",
+        text2: `Thanh toán thành công! Số thứ tự: ${result.QueueNumber}`,
+      });
+      router.push("/(tabs)/home");
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Thất bại ❌",
+        text2: result?.message || "Thanh toán không thành công!",
+      });
+    }
+  }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Thông tin bệnh nhân */}
-      <Text style={styles.label}>
-        Tên bệnh nhân: <Text style={styles.bold}>Nguyễn Thị Hồng Nhung</Text>
-      </Text>
-      <Text style={styles.label}>
-        Tổng tiền: <Text style={styles.price}>85.000 VNĐ</Text>
-      </Text>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Thông tin bệnh nhân */}
+        <Text style={styles.label}>
+          Tên bệnh nhân: <Text style={styles.bold}>{name}</Text>
+        </Text>
+        <Text style={styles.label}>
+          Tổng tiền: <Text style={styles.price}>85.000 VNĐ</Text>
+        </Text>
 
-      {/* Phương thức thanh toán */}
-      <Text style={styles.label}>Phương thức thanh toán</Text>
-      <View style={styles.methodWrapper}>
-        {/* Tiền mặt */}
-        <TouchableOpacity
-          style={[
-            styles.methodBox,
-            selectedMethod === "cash" && styles.methodBoxSelected,
-          ]}
-          onPress={() => setSelectedMethod("cash")}
-        >
-          <Image
-            source={{ uri: "https://img.icons8.com/fluency/96/money.png" }}
-            style={styles.icon}
-          />
-          <Text style={styles.methodText}>Tiền mặt</Text>
-          {selectedMethod === "cash" && <Text style={styles.check}>✓</Text>}
-        </TouchableOpacity>
+        {/* Phương thức thanh toán */}
+        <Text style={styles.label}>Phương thức thanh toán: </Text>
+        <View style={styles.methodWrapper}>
+          {/* Tiền mặt */}
+          <TouchableOpacity
+            style={[
+              styles.methodBox,
+              selectedMethod === "cash" && styles.methodBoxSelected,
+            ]}
+            onPress={() => setSelectedMethod("cash")}
+          >
+            <Ionicons name="cash" size={30} color="green" />
 
-        {/* MoMo */}
-        <TouchableOpacity
-          style={[
-            styles.methodBox,
-            selectedMethod === "momo" && styles.methodBoxSelected,
-          ]}
-          onPress={() => setSelectedMethod("momo")}
-        >
-          <Image
-            source={{
-              uri: "https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png",
-            }}
-            style={styles.icon}
-          />
-          <Text style={styles.methodText}>MoMo</Text>
-          {selectedMethod === "momo" && <Text style={styles.check}>✓</Text>}
-        </TouchableOpacity>
-      </View>
+            <Text style={styles.methodText}>Tiền mặt</Text>
+            {selectedMethod === "cash" && <Text style={styles.check}>✓</Text>}
+          </TouchableOpacity>
 
-      {/* Nút hành động */}
+          {/* MoMo */}
+          <TouchableOpacity
+            style={[
+              styles.methodBox,
+              selectedMethod === "momo" && styles.methodBoxSelected,
+            ]}
+            onPress={() => setSelectedMethod("momo")}
+          >
+            <Ionicons name="wallet" size={30} color="purple" />
+            <Text style={styles.methodText}>Chuyển khoản</Text>
+            {selectedMethod === "momo" && <Text style={styles.check}>✓</Text>}
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* Nút cố định dưới */}
       <View style={styles.actions}>
         <TouchableOpacity style={[styles.btn, styles.btnCancel]}>
           <Text style={styles.btnText}>Hủy</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.btn, styles.btnConfirm]}>
+        <TouchableOpacity
+          onPress={
+            Pay
+          }
+          style={[styles.btn, styles.btnConfirm]}
+        >
           <Text style={styles.btnText}>Xác nhận thanh toán</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#fff",
     flexGrow: 1,
   },
   label: {
@@ -85,14 +114,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   methodWrapper: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-between",
-    marginVertical: 20,
+    marginVertical: 12,
+    gap: 12,
   },
   methodBox: {
     flex: 1,
-    marginHorizontal: 5,
-    padding: 15,
+    flexDirection: "row",
+    gap: 12,
+    padding: 12,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#ddd",
@@ -126,7 +157,11 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 30,
+    paddingHorizontal: 12,
+    borderTopWidth: 1,
+    borderColor: "#eee",
+    paddingVertical: 10,
+    backgroundColor: "#fff",
   },
   btn: {
     paddingVertical: 14,
@@ -135,12 +170,11 @@ const styles = StyleSheet.create({
   },
   btnCancel: {
     backgroundColor: "#e74c3c",
-    flex: 1, // nhỏ hơn
-    marginRight: 10,
+    flex: 1,
   },
   btnConfirm: {
     backgroundColor: "#007A86",
-    flex: 2, // to hơn
+    flex: 2,
     marginLeft: 10,
   },
   btnText: {
