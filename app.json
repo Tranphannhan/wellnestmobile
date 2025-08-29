@@ -1,45 +1,37 @@
 {
   "expo": {
-    "name": "wellnestapp",
+    "name": "Well Nest",
     "slug": "wellnestapp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/adaptive-icon.png",
+    "icon": "./assets/images/Screenshot 2025-07-25 201919.png",
     "scheme": "wellnestapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
+    "splash": {
+      "image": "./assets/images/Screenshot 2025-07-25 201919.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/Screenshot 2025-07-25 201919.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": [
-        "CAMERA",
-        "android.permission.CAMERA"
-      ],
+      "permissions": ["CAMERA", "android.permission.CAMERA"],
       "package": "com.anonymous.wellnestapp"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/Screenshot 2025-07-25 201919.png"
     },
     "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ],
-      "expo-barcode-scanner"
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true

@@ -11,23 +11,22 @@ import {
   View,
 } from "react-native";
 
+
 export default function QrScanner() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [qrData, setQrData] = useState("");
 
-
   useFocusEffect(
-  useCallback(() => {
-    const clearStorage = async () => {
-      await AsyncStorage.removeItem("PatientInformation");
-      console.log("✅ Đã xóa PatientInformation khi vào lại QrScanner");
-    };
-    
-    clearStorage();
-  }, [])
-);
+    useCallback(() => {
+      const clearStorage = async () => {
+        await AsyncStorage.removeItem("PatientInformation");
+        console.log("✅ Đã xóa PatientInformation khi vào lại QrScanner");
+      };
+      clearStorage();
+    }, [])
+  );
 
   // Animation cho tia laser
   const animatedValue = useState(new Animated.Value(0))[0];
@@ -46,9 +45,8 @@ export default function QrScanner() {
         }),
       ])
     ).start();
-  }, []); 
+  }, []);
 
-  
   if (!permission) return <View />;
   if (!permission.granted) {
     return (
@@ -63,53 +61,70 @@ export default function QrScanner() {
     );
   }
 
+  // 🔹 Hàm parse dữ liệu từ QR (hoàn thiện cho cả 2 format)
+  const parseQrData = (raw: string) => {
+    let cccd = "";
+    let hoTen = "";
+    let ngaySinh = "";
+    let gioiTinh = "";
+    let diaChi = "";
 
 
+    if (raw.includes("||")) {
+      // Format 1: cccd||hoTen|ngaySinh|gioiTinh|diaChi|ngayCap
+      const [cccdPart, infoPart] = raw.split("||");
+      const info = infoPart ? infoPart.split("|") : [];
+      cccd = cccdPart || "";
+      hoTen = info[0] || "";
+      ngaySinh = info[1] || "";
+      gioiTinh = info[2] || "";
+      diaChi = info[3] || "";
+    } else {
+      // Format 2: cccd|soThe|hoTen|ngaySinh|gioiTinh|diaChi|ngayCap
+      const info = raw.split("|");
+      cccd = info[0] || "";
+      hoTen = info[2] || "";
+      ngaySinh = info[3] || "";
+      gioiTinh = info[4] || "";
+      diaChi = info[5] || "";
+    }
+
+    return { cccd, hoTen, ngaySinh, gioiTinh, diaChi };
+  };
 
   const handleBarCodeScanned = async (event: { data: string; type: string }) => {
     setScanned(true);
     setQrData(event.data);
-    const cccd = event.data.split("||")[0];
+
+    // Luôn lấy CCCD chuẩn từ QR
+    const parsedData = parseQrData(event.data);
+    const { cccd } = parsedData;
+
+    // Gọi API để kiểm tra trong DB
     const result = await SearchScanQrCode(cccd);
+    console.log("📡 Đang quét QR:", event.data);
+    console.log("➡️ Kết quả DB:", result.data.length);
 
-
-    // Chưa có thông tin bệnh nhân
-    if (result.data.length === 0){
-      const parts = event.data.split("||"); 
-      const cccd = parts[0]; 
-      const info = parts[1].split("|"); 
-
-      const data = {
-        cccd: cccd,
-        hoTen: info[0],
-        ngaySinh: info[1],
-        gioiTinh: info[2],
-        diaChi: info[3],
-      };
+    if (result.data.length === 0) {
+      console.log("❌ Chưa có thông tin bệnh nhân trong DB");
 
       try {
-        await AsyncStorage.setItem("PatientInformation", JSON.stringify(data));
+        await AsyncStorage.setItem(
+          "PatientInformation",
+          JSON.stringify(parsedData)
+        );
         router.push("/createmanually");
-
-
       } catch (error) {
         console.error("❌ Lỗi khi lưu:", error);
       }
-
-    }
- 
-
-    // Nếu có thông tin 
-    if (result.data[0]._id) {
+    } else if (result.data[0]._id) {
+      console.log("✅ Có thông tin, chuyển sang PatientDetails");
       router.push({
         pathname: "/PatientDetails",
         params: { id: result.data[0]._id },
       });
-    } 
-
+    }
   };
-
-
 
   return (
     <View style={styles.container}>
@@ -124,22 +139,16 @@ export default function QrScanner() {
 
       {/* Vùng quét */}
       <View style={styles.scanBox}>
-        {/* Góc khung */}
         <View style={[styles.corner, styles.topLeft]} />
         <View style={[styles.corner, styles.topRight]} />
         <View style={[styles.corner, styles.bottomLeft]} />
         <View style={[styles.corner, styles.bottomRight]} />
 
-        {/* Tia laser */}
         <Animated.View
-          style={[
-            styles.laser,
-            { transform: [{ translateY: animatedValue }] },
-          ]}
+          style={[styles.laser, { transform: [{ translateY: animatedValue }] }]}
         />
       </View>
 
-      {/* Text & nút */}
       <View style={styles.bottomOverlay}>
         {scanned ? (
           <TouchableOpacity
@@ -151,21 +160,13 @@ export default function QrScanner() {
         ) : (
           <Text style={styles.text}>Đưa mã QR vào khung để quét</Text>
         )}
-
-        {/* hiện thông tin */}
-        {/* {qrData ? <Text style={styles.result}>Kết quả: {qrData}</Text> : null} */}
-
-
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "black",
-  },
+  container: { flex: 1, backgroundColor: "black" },
   scanBox: {
     position: "absolute",
     top: "25%",
@@ -180,53 +181,25 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 40,
     height: 40,
-    borderColor: "#007A86", // màu viền xanh đậm
+    borderColor: "#007A86",
   },
-  topLeft: {
-    top: 0,
-    left: 0,
-    borderLeftWidth: 4,
-    borderTopWidth: 4,
-  },
-  topRight: {
-    top: 0,
-    right: 0,
-    borderRightWidth: 4,
-    borderTopWidth: 4,
-  },
-  bottomLeft: {
-    bottom: 0,
-    left: 0,
-    borderLeftWidth: 4,
-    borderBottomWidth: 4,
-  },
+  topLeft: { top: 0, left: 0, borderLeftWidth: 4, borderTopWidth: 4 },
+  topRight: { top: 0, right: 0, borderRightWidth: 4, borderTopWidth: 4 },
+  bottomLeft: { bottom: 0, left: 0, borderLeftWidth: 4, borderBottomWidth: 4 },
   bottomRight: {
     bottom: 0,
     right: 0,
     borderRightWidth: 4,
     borderBottomWidth: 4,
   },
-  laser: {
-    width: "100%",
-    height: 2,
-    backgroundColor: "red",
-  },
+  laser: { width: "100%", height: 2, backgroundColor: "red" },
   bottomOverlay: {
     position: "absolute",
     bottom: 80,
     width: "100%",
     alignItems: "center",
   },
-  text: {
-    color: "white",
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  result: {
-    color: "yellow",
-    fontSize: 16,
-    marginTop: 10,
-  },
+  text: { color: "white", fontSize: 18, marginBottom: 10 },
   button: {
     backgroundColor: "#007A86",
     paddingVertical: 12,
@@ -239,10 +212,5 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginTop: 10,
   },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-  },
+  buttonText: { color: "white", fontSize: 16, fontWeight: "600" },
 });
