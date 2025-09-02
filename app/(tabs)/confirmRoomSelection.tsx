@@ -22,6 +22,12 @@ interface createExaminationCardInformationType {
   LyDoDenKham?: string;
 }
 
+interface VitalSignsType {
+  Id_PhieuKhamBenh: string;
+  ChieuCao: string;
+  CanNang: string;
+}
+
 export default function ChooseRoomMobile() {
   const [rooms, setRooms] = useState<receptionTemporaryDoctorTypes[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,46 +39,85 @@ export default function ChooseRoomMobile() {
   const MINUTES_PER_PATIENT = 15;
 
   async function handleNext(Doctor: string, roomNumber: string) {
-    const dataLocal = await AsyncStorage.getItem("patientDetail");
-    const jsonDataLocal: medicalExaminationBook = dataLocal
-      ? JSON.parse(dataLocal)
-      : null;
+    try {
+      // Lấy dữ liệu từ AsyncStorage
+      const dataLocal = await AsyncStorage.getItem("patientDetail");
+      const jsonDataLocal: medicalExaminationBook = dataLocal
+        ? JSON.parse(dataLocal)
+        : null;
 
-    const examinationCardInformation: createExaminationCardInformationType = {
-      Id_Bacsi: Doctor,
-      LyDoDenKham: reason as string,
-      Id_TheKhamBenh: jsonDataLocal._id,
-      Id_GiaDichVu: "683420eb8b7660453369dce1",
-      Id_NguoiTiepNhan: "68272e93b4cfad70da810029",
-    };
-
-    const response = await fetch(
-      `https://bewellnest.onrender.com/Phieu_Kham_Benh/Add`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(examinationCardInformation),
+      if (!jsonDataLocal?._id) {
+        throw new Error("Không tìm thấy thông tin bệnh nhân!");
       }
-    );
 
-    if (!response.ok) {
-      Toast.show({
-        type: "error",
-        text1: "Lỗi",
-        text2: "Tạo phiếu khám bệnh thất bại!",
-      });
-      return;
-    } else {
+      // Kiểm tra dữ liệu đầu vào
+      if (!height || !weight) {
+        throw new Error("Chiều cao hoặc cân nặng không hợp lệ!");
+      }
+
+      // Tạo phiếu khám bệnh
+      const examinationCardInformation: createExaminationCardInformationType = {
+        Id_Bacsi: Doctor,
+        LyDoDenKham: reason as string,
+        Id_TheKhamBenh: jsonDataLocal._id,
+        Id_GiaDichVu: "683420eb8b7660453369dce1",
+        Id_NguoiTiepNhan: "68272e93b4cfad70da810029",
+      };
+
+      const response = await fetch(
+        `https://bewellnest.onrender.com/Phieu_Kham_Benh/Add`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(examinationCardInformation),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Tạo phiếu khám bệnh thất bại!");
+      }
+
       const data = await response.json();
-      const jsonData = await data.data;
+      const idPhieuKham = data.data?._id;
+
+      if (!idPhieuKham) {
+        throw new Error("Không nhận được Id_PhieuKhamBenh từ server!");
+      }
+
+      // Lưu chỉ số sinh tồn
+      const vitalSignsData: VitalSignsType = {
+        Id_PhieuKhamBenh: idPhieuKham,
+        ChieuCao: height as string,
+        CanNang: weight as string,
+      };
+
+      const vitalSignsResponse = await fetch(
+        "https://bewellnest.onrender.com/Chi_So_Sinh_Ton/Add",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(vitalSignsData),
+        }
+      );
+
+      if (!vitalSignsResponse.ok) {
+        const errorData = await vitalSignsResponse.json();
+        throw new Error(errorData.message || "Lưu chỉ số sinh tồn thất bại!");
+      }
+
+      // Hiển thị thông báo thành công
       Toast.show({
         type: "success",
         text1: "Thành công 🎉",
-        text2: "Tạo phiếu khám bệnh thành công!",
+        text2: "Tạo phiếu khám bệnh và lưu chỉ số sinh tồn thành công!",
       });
 
+      // Điều hướng đến màn hình xác nhận thanh toán
       router.push({
         pathname: "/paymentConfirmation",
         params: {
@@ -81,14 +126,28 @@ export default function ChooseRoomMobile() {
           weight,
           roomNumber,
           departmentName,
-          idPhieuKham: jsonData._id,
+          idPhieuKham,
         },
+      });
+    } catch (error) {
+      // Xử lý lỗi tổng quát
+      Toast.show({
+        type: "error",
+        text1: "Lỗi",
+        text2: error.message || "Đã xảy ra lỗi, vui lòng thử lại!",
       });
     }
   }
 
   const fetchRooms = async () => {
-    if (!idKhoa) return;
+    if (!idKhoa) {
+      Toast.show({
+        type: "error",
+        text1: "Lỗi",
+        text2: "Không tìm thấy idKhoa!",
+      });
+      return;
+    }
     try {
       setLoading(true);
       const data = await getAllChooseRooms(idKhoa as string, 1);
@@ -97,15 +156,21 @@ export default function ChooseRoomMobile() {
           (a, b) => a.SoNguoiDangKham - b.SoNguoiDangKham
         );
         setRooms(sortedRooms);
+      } else {
+        throw new Error("Không tìm thấy dữ liệu phòng khám!");
       }
     } catch (error) {
       console.error("Lỗi khi lấy phòng:", error);
+      Toast.show({
+        type: "error",
+        text1: "Lỗi",
+        text2: "Không thể lấy danh sách phòng khám!",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // Gọi lại API mỗi khi màn hình được focus
   useFocusEffect(
     useCallback(() => {
       fetchRooms();
@@ -195,13 +260,15 @@ export default function ChooseRoomMobile() {
             style={[
               styles.button,
               isFull && styles.buttonDisabled,
-              index === 0 && !isFull && styles.buttonSelected, // phòng ít bệnh nhân nhất => Ưu tiên
+              index === 0 && !isFull && styles.buttonSelected,
             ]}
           >
             <Text
               style={styles.buttonText}
               onPress={() => {
-                handleNext(item._id, item.Id_PhongKham.SoPhongKham);
+                if (!isFull) {
+                  handleNext(item._id, item.Id_PhongKham.SoPhongKham);
+                }
               }}
             >
               {isFull ? "Đã đầy" : index === 0 ? "Ưu tiên" : "Chọn phòng"}
