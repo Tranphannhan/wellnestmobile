@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { useFocusEffect } from "@react-navigation/native";
 
 export default function PaymentConfirmation() {
@@ -18,7 +19,7 @@ export default function PaymentConfirmation() {
     useLocalSearchParams();
   const router = useRouter();
 
-  // load lại dữ liệu mỗi khi màn hình được focus
+  // Load lại dữ liệu mỗi khi màn hình được focus
   useFocusEffect(
     useCallback(() => {
       const loadData = async () => {
@@ -27,18 +28,29 @@ export default function PaymentConfirmation() {
           if (dataLocal) {
             const parsed: medicalExaminationBook = JSON.parse(dataLocal);
             console.log("📌 Patient detail local:", parsed);
+            console.log("✅ Dữ liệu bệnh nhân được tải thành công!");
             setData(parsed);
           } else {
             setData(null);
+            Toast.show({
+              type: "error",
+              text1: "Lỗi",
+              text2: "Không tìm thấy thông tin bệnh nhân!",
+            });
           }
         } catch (error) {
           console.error("❌ Lỗi đọc AsyncStorage:", error);
+          Toast.show({
+            type: "error",
+            text1: "Lỗi",
+            text2: "Không thể tải thông tin bệnh nhân!",
+          });
         }
       };
 
       loadData();
 
-      // cleanup nếu cần reset khi rời trang
+      // Cleanup nếu cần reset khi rời trang
       return () => {
         setData(null);
       };
@@ -51,6 +63,22 @@ export default function PaymentConfirmation() {
       <TextInput value={value} editable={false} style={styles.input} />
     </View>
   );
+
+  const handleConfirmPayment = () => {
+    if (!idPhieuKham) {
+      Toast.show({
+        type: "error",
+        text1: "Lỗi",
+        text2: "Không tìm thấy ID phiếu khám!",
+      });
+      return;
+    }
+
+    router.push({
+      pathname: "/pay",
+      params: { name: data?.HoVaTen || "", idPhieuKham },
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -106,12 +134,7 @@ export default function PaymentConfirmation() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => {
-            router.push({
-              pathname: "/pay",
-              params: { name: data?.HoVaTen || "", idPhieuKham },
-            });
-          }}
+          onPress={handleConfirmPayment}
           style={[styles.btn, styles.btnConfirm]}
         >
           <Text style={styles.btnText}>Xác nhận đã thanh toán</Text>

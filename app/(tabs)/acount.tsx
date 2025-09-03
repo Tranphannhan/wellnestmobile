@@ -7,10 +7,13 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Modal,
+  TextInput,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
-import { useRouter } from "expo-router"; // 👈 thêm
+import { useRouter } from "expo-router";
 
 interface DecodedToken {
   _id: string;
@@ -30,35 +33,107 @@ interface DecodedToken {
 
 export default function Account() {
   const [user, setUser] = useState<DecodedToken | null>(null);
-  const router = useRouter(); // 👈 hook điều hướng
+  const [isEditModalVisible, setEditModalVisible] = useState(false);
+  const [editForm, setEditForm] = useState({
+    TenTaiKhoan: "",
+    SoDienThoai: "",
+    SoCCCD: "",
+    GioiTinh: "",
+  });
+  const router = useRouter();
+
+  // Hàm tải và giải mã dữ liệu người dùng từ AsyncStorage
+  const loadUserData = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (token) {
+        const decoded: DecodedToken = jwtDecode(token);
+        console.log("Token giải mã:", decoded); // Debug token
+        setUser(decoded);
+        setEditForm({
+          TenTaiKhoan: decoded._TenTaiKhoan || "",
+          SoDienThoai: decoded._SoDienThoai || "",
+          SoCCCD: decoded._SoCCCD || "",
+          GioiTinh: decoded._GioiTinh || "",
+        });
+      } else {
+        setUser(null);
+      }
+    } catch (err) {
+      console.error("Lỗi giải mã token:", err);
+      Alert.alert("Lỗi", "Không thể tải thông tin người dùng!");
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const token = await AsyncStorage.getItem("authToken");
-        if (token) {
-          const decoded: DecodedToken = jwtDecode(token);
-          setUser(decoded);
-        }
-      } catch (err) {
-        console.error("Decode token lỗi:", err);
-      }
-    })();
+    loadUserData();
   }, []);
 
   const handleEditInfo = () => {
-    alert("Chức năng sửa thông tin");
+    setEditModalVisible(true);
   };
 
-  async function signOut() {
+  const handleSaveEdit = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token || !user) {
+        Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng!");
+        return;
+      }
+
+      const response = await fetch(
+        `https://bewellnest.onrender.com/Tai_Khoan/Edit/${user._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            TenTaiKhoan: editForm.TenTaiKhoan,
+            SoDienThoai: editForm.SoDienThoai,
+            SoCCCD: editForm.SoCCCD,
+            GioiTinh: editForm.GioiTinh,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const updatedToken = await response.json();
+        console.log("Phản hồi API:", updatedToken); // Debug phản hồi
+        await AsyncStorage.setItem("authToken", updatedToken.token);
+        await loadUserData(); // Tải lại dữ liệu người dùng để cập nhật UI
+        setEditModalVisible(false);
+        Alert.alert("Thành công", "Thông tin đã được cập nhật!");
+      } else {
+        const errorData = await response.json();
+        Alert.alert(
+          "Lỗi",
+          errorData.message || "Không thể cập nhật thông tin!"
+        );
+      }
+    } catch (err) {
+      console.error("Lỗi gọi API:", err);
+      Alert.alert("Lỗi", "Đã có lỗi xảy ra khi cập nhật thông tin!");
+    }
+  };
+
+  const signOut = async () => {
     try {
       await AsyncStorage.removeItem("authToken");
       setUser(null);
-      router.replace("/login"); // 👈 điều hướng về login
+      setEditForm({
+        TenTaiKhoan: "",
+        SoDienThoai: "",
+        SoCCCD: "",
+        GioiTinh: "",
+      });
+      router.replace("/login");
     } catch (err) {
-      console.error("Không thể xóa token:", err);
+      console.error("Lỗi xóa token:", err);
+      Alert.alert("Lỗi", "Không thể đăng xuất!");
     }
-  }
+  };
 
   if (!user) {
     return (
@@ -69,7 +144,9 @@ export default function Account() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} key={user?._id || "default"}>
+      {" "}
+      {/* Thêm key để buộc re-render nếu cần */}
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
@@ -83,23 +160,34 @@ export default function Account() {
             uri: `https://bewellnest.onrender.com/image/${user._Image}`,
           }}
           style={styles.avatar}
+          onError={() => console.log("Lỗi tải ảnh")} // Debug lỗi tải ảnh
         />
         <Text style={styles.name}>{user._TenTaiKhoan}</Text>
         <Text style={styles.role}>{user._Id_LoaiTaiKhoan?.VaiTro}</Text>
       </View>
-
       {/* Thông tin cá nhân */}
       <View style={styles.infoBox}>
-        <InfoRow icon="call-outline" label="Số điện thoại" value={user._SoDienThoai} />
+        <InfoRow
+          icon="call-outline"
+          label="Số điện thoại"
+          value={user._SoDienThoai}
+        />
         <InfoRow icon="card-outline" label="CCCD" value={user._SoCCCD} />
         {user._NamSinh && (
-          <InfoRow icon="calendar-outline" label="Năm sinh" value={user._NamSinh} />
+          <InfoRow
+            icon="calendar-outline"
+            label="Năm sinh"
+            value={user._NamSinh}
+          />
         )}
         {user._GioiTinh && (
-          <InfoRow icon="male-outline" label="Giới tính" value={user._GioiTinh} />
+          <InfoRow
+            icon="male-outline"
+            label="Giới tính"
+            value={user._GioiTinh}
+          />
         )}
       </View>
-
       {/* Nút chức năng */}
       <View style={styles.actionBox}>
         <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
@@ -107,6 +195,72 @@ export default function Account() {
           <Text style={styles.logoutButtonText}>Đăng xuất</Text>
         </TouchableOpacity>
       </View>
+      {/* Modal chỉnh sửa thông tin */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isEditModalVisible}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Chỉnh sửa thông tin</Text>
+
+            <Text style={styles.inputLabel}>Tên tài khoản</Text>
+            <TextInput
+              style={styles.input}
+              value={editForm.TenTaiKhoan}
+              onChangeText={(text) =>
+                setEditForm({ ...editForm, TenTaiKhoan: text })
+              }
+            />
+
+            <Text style={styles.inputLabel}>Số điện thoại</Text>
+            <TextInput
+              style={styles.input}
+              value={editForm.SoDienThoai}
+              onChangeText={(text) =>
+                setEditForm({ ...editForm, SoDienThoai: text })
+              }
+            />
+
+            <Text style={styles.inputLabel}>Số CCCD</Text>
+            <TextInput
+              style={styles.input}
+              value={editForm.SoCCCD}
+              onChangeText={(text) =>
+                setEditForm({ ...editForm, SoCCCD: text })
+              }
+            />
+
+            <Text style={styles.inputLabel}>Giới tính</Text>
+            <TextInput
+              style={styles.input}
+              value={editForm.GioiTinh}
+              onChangeText={(text) =>
+                setEditForm({ ...editForm, GioiTinh: text })
+              }
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: "#ccc" }]}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: "#007A86" }]}
+                onPress={handleSaveEdit}
+              >
+                <Text style={[styles.modalButtonText, { color: "#fff" }]}>
+                  Lưu
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -121,7 +275,12 @@ const InfoRow = ({
   value: string;
 }) => (
   <View style={styles.infoRow}>
-    <Ionicons name={icon} size={20} color="#007A86" style={{ marginRight: 10 }} />
+    <Ionicons
+      name={icon}
+      size={20}
+      color="#007A86"
+      style={{ marginRight: 10 }}
+    />
     <View style={{ flex: 1 }}>
       <Text style={styles.label}>{label}</Text>
       <Text style={styles.value}>{value}</Text>
@@ -181,7 +340,7 @@ const styles = StyleSheet.create({
   value: { color: "#333", fontSize: 14 },
   actionBox: { marginTop: 30, marginHorizontal: 16, gap: 12 },
   logoutButton: {
-    backgroundColor: "#4d4d4dff",
+    backgroundColor: "#4d4d4d",
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
@@ -190,4 +349,50 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logoutButtonText: { color: "#fff", fontSize: 16 },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 5,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  modalButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });

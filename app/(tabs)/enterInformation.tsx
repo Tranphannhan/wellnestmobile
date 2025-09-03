@@ -111,7 +111,9 @@ export default function EnterInformation() {
               const selectedDept = dataDepartment.find(
                 (d) => d._id === itemValue
               );
-              setDepartmentName(selectedDept ? selectedDept.TenKhoa as string : "");
+              setDepartmentName(
+                selectedDept ? (selectedDept.TenKhoa as string) : ""
+              );
             }}
           >
             <Picker.Item label="--- Chọn khoa ---" value="" />
