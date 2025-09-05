@@ -134,7 +134,7 @@ export default function ChooseRoomMobile() {
       Toast.show({
         type: "error",
         text1: "Lỗi",
-        text2: error.message || "Đã xảy ra lỗi, vui lòng thử lại!",
+        text2: "Đã xảy ra lỗi, vui lòng thử lại!",
       });
     }
   }
